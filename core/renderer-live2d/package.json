@@ -1,0 +1,11 @@
+{
+  "name": "@cyrene/renderer-live2d",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@cyrene/kernel": "0.1.0",
+    "@cyrene/shared-types": "0.1.0"
+  }
+}

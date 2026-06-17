@@ -1,0 +1,21 @@
+{
+  "name": "cyrene",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A lightweight, extensible desktop pet platform centered on Pet Actor runtime and pluggable renderers.",
+  "type": "module",
+  "workspaces": [
+    "core/*",
+    "packages/*",
+    "plugins/official/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "check": "tsc -b",
+    "dev": "echo \"Desktop shell will be added after the core runtime stabilizes.\""
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "npm@10.0.0"
+}
