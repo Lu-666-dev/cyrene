@@ -6,11 +6,16 @@ type Handler<TPayload> = (
 ) => void | Promise<void>;
 
 export class EventBus implements EventBusPort {
-  private readonly handlers = new Map<EventName, Set<Handler<unknown>>>();
-
-  constructor(private readonly source: PluginId | "kernel" = "kernel") {}
+  constructor(
+    private readonly source: PluginId | "kernel" = "kernel",
+    private readonly handlers = new Map<EventName, Set<Handler<unknown>>>()
+  ) {}
 
   emit<TPayload>(name: EventName, payload: TPayload): void {
+    void this.emitAndWait(name, payload);
+  }
+
+  async emitAndWait<TPayload>(name: EventName, payload: TPayload): Promise<void> {
     const event: EventEnvelope<TPayload> = {
       name,
       source: this.source,
@@ -23,9 +28,7 @@ export class EventBus implements EventBusPort {
       return;
     }
 
-    for (const handler of handlers) {
-      void handler(event as EventEnvelope<unknown>);
-    }
+    await Promise.all([...handlers].map((handler) => handler(event as EventEnvelope<unknown>)));
   }
 
   on<TPayload>(
@@ -42,11 +45,6 @@ export class EventBus implements EventBusPort {
   }
 
   scoped(source: PluginId | "kernel"): EventBus {
-    const scoped = new EventBus(source);
-    scoped.handlers.clear();
-    for (const [name, handlers] of this.handlers) {
-      scoped.handlers.set(name, handlers);
-    }
-    return scoped;
+    return new EventBus(source, this.handlers);
   }
 }

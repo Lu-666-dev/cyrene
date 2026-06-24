@@ -9,13 +9,22 @@ export class PetActorManager {
     private readonly events: EventBus,
     private readonly capabilities: CapabilityRegistry
   ) {
-    this.capabilities.register<{ actorId: string }, PetActorState>("kernel", "pet.actor.get", async ({ actorId }) => {
+    const kernelCapabilities = this.capabilities.scoped("kernel");
+
+    kernelCapabilities.register<{ actorId: string }, PetActorState>("pet.actor.get", async ({ actorId }) => {
       if (typeof actorId !== "string") {
         throw new Error("actorId must be a string");
       }
 
       const actor = this.get(actorId);
       return actor.snapshot();
+    });
+
+    kernelCapabilities.register<
+      { actorId: string; patch: Partial<Omit<PetActorState, "actorId" | "modelId">> },
+      PetActorState
+    >("pet.actor.patch", async ({ actorId, patch }) => {
+      return this.get(actorId).updateState(patch);
     });
   }
 

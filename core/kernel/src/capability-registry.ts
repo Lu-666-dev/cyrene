@@ -11,10 +11,13 @@ interface CapabilityRegistration {
 }
 
 export class CapabilityRegistry implements CapabilityPort {
-  private readonly capabilities = new Map<CapabilityName, CapabilityRegistration>();
+  private scopedOwner: PluginId | "kernel" = "kernel";
+
+  constructor(
+    private readonly capabilities = new Map<CapabilityName, CapabilityRegistration>()
+  ) {}
 
   register<TInput, TOutput>(
-    owner: PluginId | "kernel",
     name: CapabilityName,
     handler: CapabilityHandler<TInput, TOutput>
   ): () => void {
@@ -23,13 +26,13 @@ export class CapabilityRegistry implements CapabilityPort {
     }
 
     this.capabilities.set(name, {
-      owner,
+      owner: this.scopedOwner,
       handler: handler as unknown as CapabilityHandler<unknown, unknown>
     });
 
     return () => {
       const current = this.capabilities.get(name);
-      if (current?.owner === owner) {
+      if (current?.owner === this.scopedOwner) {
         this.capabilities.delete(name);
       }
     };
@@ -44,6 +47,12 @@ export class CapabilityRegistry implements CapabilityPort {
       throw new Error(`Capability not found: ${name}`);
     }
 
-    return registration.handler(input) as Promise<TOutput>;
+    return Promise.resolve(registration.handler(input)) as Promise<TOutput>;
+  }
+
+  scoped(owner: PluginId | "kernel"): CapabilityRegistry {
+    const scoped = new CapabilityRegistry(this.capabilities);
+    scoped.scopedOwner = owner;
+    return scoped;
   }
 }

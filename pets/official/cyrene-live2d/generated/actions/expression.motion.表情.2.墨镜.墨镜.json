@@ -1,0 +1,20 @@
+{
+  "id": "expression.motion.表情.2.墨镜.墨镜",
+  "kind": "atomic",
+  "scope": "self",
+  "label": "墨镜",
+  "source": "expression",
+  "sourceKey": "expression:墨镜",
+  "channelIds": [
+    "parameter:Param4"
+  ],
+  "play": {
+    "motionGroup": "表情#2",
+    "motionIndex": 1,
+    "motionName": "墨镜",
+    "expression": "墨镜"
+  },
+  "tags": [
+    "expression"
+  ]
+}

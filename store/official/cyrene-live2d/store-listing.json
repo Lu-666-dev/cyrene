@@ -1,0 +1,19 @@
+{
+  "id": "store.official.cyrene-live2d",
+  "packId": "official.cyrene-live2d",
+  "title": "Cyrene Live2D",
+  "summary": "Local Cyrene Live2D model packaged as a Cyrene pet-model content pack.",
+  "version": "0.1.0",
+  "category": "pet-model",
+  "download": {
+    "url": "local://official/cyrene-live2d",
+    "sha256": "local-development-package",
+    "sizeBytes": 0
+  },
+  "preview": {
+    "thumbnail": "Textures_0_0.png",
+    "images": [
+      "Textures_0_0.png"
+    ]
+  }
+}

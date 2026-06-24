@@ -1,0 +1,19 @@
+{
+  "id": "expression.circle.question",
+  "kind": "composite",
+  "scope": "self",
+  "label": "circle_question",
+  "source": "expression",
+  "sourceKey": "expression:circle_question",
+  "channelIds": [
+    "parameter:Param2",
+    "parameter:Param6"
+  ],
+  "play": {
+    "expression": "circle_question"
+  },
+  "tags": [
+    "expression",
+    "multi-channel"
+  ]
+}

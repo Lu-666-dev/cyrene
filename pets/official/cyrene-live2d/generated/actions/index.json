@@ -1,0 +1,84 @@
+{
+  "packId": "official.cyrene-live2d",
+  "generatedAt": "2026-06-18T15:49:03.426Z",
+  "actions": [
+    {
+      "id": "motion.motions.tick3.3.file.0.json",
+      "file": "motion.motions.tick3.3.file.0.json.json"
+    },
+    {
+      "id": "expression.motion.绳子开关.5.关.关",
+      "file": "expression.motion.绳子开关.5.关.关.json"
+    },
+    {
+      "id": "expression.motion.绳子开关.5.开.回正.开",
+      "file": "expression.motion.绳子开关.5.开.回正.开.json"
+    },
+    {
+      "id": "expression.motion.表情.2.开心眼.开心眼",
+      "file": "expression.motion.表情.2.开心眼.开心眼.json"
+    },
+    {
+      "id": "expression.motion.表情.2.墨镜.墨镜",
+      "file": "expression.motion.表情.2.墨镜.墨镜.json"
+    },
+    {
+      "id": "expression.motion.表情.2.圈圈眼.圈圈眼",
+      "file": "expression.motion.表情.2.圈圈眼.圈圈眼.json"
+    },
+    {
+      "id": "expression.motion.表情3.4.闪耀.闪耀",
+      "file": "expression.motion.表情3.4.闪耀.闪耀.json"
+    },
+    {
+      "id": "expression.motion.表情2.3.问号.问号",
+      "file": "expression.motion.表情2.3.问号.问号.json"
+    },
+    {
+      "id": "motion.motions.action6.2.file.0.json",
+      "file": "motion.motions.action6.2.file.0.json.json"
+    },
+    {
+      "id": "motion.motions.action6.3.file.0.json",
+      "file": "motion.motions.action6.3.file.0.json.json"
+    },
+    {
+      "id": "expression.motion.表情.2.星星眼.星星眼",
+      "file": "expression.motion.表情.2.星星眼.星星眼.json"
+    },
+    {
+      "id": "expression.motion.秋千.1.拽秋千1.拽秋千1",
+      "file": "expression.motion.秋千.1.拽秋千1.拽秋千1.json"
+    },
+    {
+      "id": "expression.motion.秋千.1.拽秋千2.拽秋千2",
+      "file": "expression.motion.秋千.1.拽秋千2.拽秋千2.json"
+    },
+    {
+      "id": "expression.circle.question",
+      "file": "expression.circle.question.json"
+    },
+    {
+      "id": "motion.motions.action6.1.file.0.json",
+      "file": "motion.motions.action6.1.file.0.json.json"
+    }
+  ],
+  "resetActions": [
+    {
+      "id": "motion.motions.action6.0.file.0.json",
+      "file": "motion.motions.action6.0.file.0.json.json"
+    },
+    {
+      "id": "expression.motion.start.初始化.开",
+      "file": "expression.motion.start.初始化.开.json"
+    },
+    {
+      "id": "expression.表情回正",
+      "file": "expression.表情回正.json"
+    },
+    {
+      "id": "expression.拽秋千回正",
+      "file": "expression.拽秋千回正.json"
+    }
+  ]
+}

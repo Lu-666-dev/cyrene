@@ -1,0 +1,24 @@
+{
+  "id": "expression.motion.start.初始化.开",
+  "kind": "stateful",
+  "scope": "persistent",
+  "label": "初始化",
+  "source": "expression",
+  "sourceKey": "expression:开",
+  "channelIds": [
+    "parameter:Param16"
+  ],
+  "play": {
+    "motionGroup": "Start",
+    "motionIndex": 0,
+    "motionName": "初始化",
+    "expression": "开"
+  },
+  "tags": [
+    "expression",
+    "reset",
+    "stateful",
+    "switch",
+    "reset"
+  ]
+}

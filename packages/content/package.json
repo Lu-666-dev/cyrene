@@ -1,0 +1,10 @@
+{
+  "name": "@cyrene/content",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@cyrene/shared-types": "0.1.0"
+  }
+}

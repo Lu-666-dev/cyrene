@@ -13,6 +13,11 @@ export interface EventBusPort {
 }
 
 export interface CapabilityPort {
+  register<TInput, TOutput>(
+    name: CapabilityName,
+    handler: (input: TInput) => Promise<TOutput> | TOutput
+  ): () => void;
+
   call<TInput, TOutput>(
     name: CapabilityName,
     input: TInput

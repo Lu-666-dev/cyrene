@@ -1,0 +1,31 @@
+:root {
+  background: transparent;
+}
+
+html,
+body,
+#pet-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  -webkit-app-region: drag;
+}
+
+canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hit-boundary-overlay {
+  pointer-events: none;
+  z-index: 2;
+}

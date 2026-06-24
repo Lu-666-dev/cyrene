@@ -6,6 +6,9 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
-  "references": [{ "path": "../../../packages/sdk" }],
+  "references": [
+    { "path": "../../../packages/sdk" },
+    { "path": "../../../packages/shared-types" }
+  ],
   "include": ["src/**/*.ts"]
 }

@@ -1,0 +1,20 @@
+{
+  "id": "expression.motion.表情.2.开心眼.开心眼",
+  "kind": "atomic",
+  "scope": "self",
+  "label": "开心眼",
+  "source": "expression",
+  "sourceKey": "expression:开心眼",
+  "channelIds": [
+    "parameter:Param3"
+  ],
+  "play": {
+    "motionGroup": "表情#2",
+    "motionIndex": 4,
+    "motionName": "开心眼",
+    "expression": "开心眼"
+  },
+  "tags": [
+    "expression"
+  ]
+}

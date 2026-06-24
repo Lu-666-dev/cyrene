@@ -1,0 +1,41 @@
+{
+  "id": "official.cyrene-live2d",
+  "type": "pet-model",
+  "name": "Cyrene Live2D",
+  "version": "0.1.0",
+  "authors": ["Cyrene Team"],
+  "renderer": "live2d",
+  "entry": "cyrene.model3.json",
+  "files": [
+    "cyrene.model3.json",
+    "Moc_0.moc3",
+    "Textures_0_0.png",
+    "Physics_0.json",
+    "Motions_action6_0_File_0.json",
+    "Motions_action6_1_File_0.json",
+    "Motions_action6_2_File_0.json",
+    "Motions_action6_3_File_0.json",
+    "Motions_Tick3_3_File_0.json",
+    "Expressions_0_File_0.json",
+    "Expressions_1_File_0.json",
+    "Expressions_2_File_0.json",
+    "Expressions_3_File_0.json",
+    "Expressions_4_File_0.json",
+    "Expressions_5_File_0.json",
+    "Expressions_6_File_0.json",
+    "Expressions_7_File_0.json",
+    "Expressions_8_File_0.json",
+    "Expressions_9_File_0.json",
+    "Expressions_10_File_0.json",
+    "Expressions_11_File_0.json",
+    "Expressions_circle_question.json",
+    "cyrene-actions.json"
+  ],
+  "license": {
+    "name": "Local User Asset"
+  },
+  "compatibility": {
+    "cyrene": ">=0.1.0",
+    "renderers": ["live2d"]
+  }
+}

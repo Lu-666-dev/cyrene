@@ -1,5 +1,8 @@
 node_modules/
 
+.tmp/
+apps/desktop/.tmp/
+
 dist/
 **/dist/
 *.tsbuildinfo

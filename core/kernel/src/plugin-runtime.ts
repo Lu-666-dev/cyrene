@@ -21,7 +21,7 @@ export class PluginRuntime {
     const ctx: PluginContext = {
       manifest,
       events: this.events.scoped(manifest.id),
-      capabilities: this.capabilities,
+      capabilities: this.capabilities.scoped(manifest.id),
       storage: new MemoryPluginStorage(manifest.id, this.sharedStorage),
       log: {
         info: (message, meta) => this.log("info", manifest.id, message, meta),

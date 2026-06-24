@@ -1,0 +1,20 @@
+{
+  "id": "expression.motion.表情.2.圈圈眼.圈圈眼",
+  "kind": "atomic",
+  "scope": "self",
+  "label": "圈圈眼",
+  "source": "expression",
+  "sourceKey": "expression:圈圈眼",
+  "channelIds": [
+    "parameter:Param2"
+  ],
+  "play": {
+    "motionGroup": "表情#2",
+    "motionIndex": 3,
+    "motionName": "圈圈眼",
+    "expression": "圈圈眼"
+  },
+  "tags": [
+    "expression"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "motion.motions.action6.0.file.0.json",
+  "kind": "atomic",
+  "scope": "self",
+  "label": "动作回正",
+  "source": "motion",
+  "sourceKey": "motion-file:Motions_action6_0_File_0.json",
+  "channelIds": [
+    "body:motion"
+  ],
+  "play": {
+    "motionGroup": "动作#6",
+    "motionIndex": 0,
+    "motionName": "动作回正"
+  },
+  "tags": [
+    "motion",
+    "reset",
+    "stateful"
+  ]
+}

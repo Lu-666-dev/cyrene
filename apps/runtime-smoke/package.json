@@ -1,0 +1,17 @@
+{
+  "name": "@cyrene/runtime-smoke",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@cyrene/kernel": "0.1.0",
+    "@cyrene/content": "0.1.0",
+    "@cyrene/runtime": "0.1.0",
+    "@cyrene/renderer-live2d": "0.1.0",
+    "@cyrene/plugin-pet-stats": "0.1.0",
+    "@cyrene/plugin-feeding": "0.1.0",
+    "@cyrene/shared-types": "0.1.0"
+  }
+}

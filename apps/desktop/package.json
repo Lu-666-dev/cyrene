@@ -1,0 +1,13 @@
+{
+  "name": "@cyrene/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/main.mjs",
+  "scripts": {
+    "dev": "node scripts/start-dev.mjs"
+  },
+  "devDependencies": {
+    "electron": "^41.7.1"
+  }
+}

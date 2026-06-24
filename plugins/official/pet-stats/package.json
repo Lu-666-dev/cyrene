@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@cyrene/sdk": "0.1.0"
+    "@cyrene/sdk": "0.1.0",
+    "@cyrene/shared-types": "0.1.0"
   }
 }

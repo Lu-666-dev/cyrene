@@ -1,0 +1,18 @@
+{
+  "id": "expression.拽秋千回正",
+  "kind": "atomic",
+  "scope": "self",
+  "label": "拽秋千回正",
+  "source": "expression",
+  "sourceKey": "expression:拽秋千回正",
+  "channelIds": [
+    "parameter:Param32"
+  ],
+  "play": {
+    "expression": "拽秋千回正"
+  },
+  "tags": [
+    "expression",
+    "reset"
+  ]
+}

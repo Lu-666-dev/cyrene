@@ -1,0 +1,49 @@
+{
+  "actions": {
+    "idle.normal": {
+      "motionGroup": "Tick3",
+      "priority": 0
+    },
+    "happy.react": {
+      "motionGroup": "动作#6",
+      "priority": 1
+    },
+    "eat.accept": {
+      "motionGroup": "动作#6",
+      "priority": 2,
+      "parameters": {
+        "ParamMouthOpenY": 0.45
+      }
+    },
+    "drag.start": {
+      "motionGroup": "动作#6",
+      "priority": 3
+    },
+    "drag.end": {
+      "motionGroup": "Tick3",
+      "priority": 1
+    },
+    "sleep.enter": {
+      "motionGroup": "Tick3",
+      "priority": 2
+    },
+    "sleep.exit": {
+      "motionGroup": "Tick3",
+      "priority": 2
+    },
+    "curious.question": {
+      "expression": "circle_question",
+      "priority": 1
+    }
+  },
+  "hitAreas": {
+    "head": {
+      "semanticEvent": "pet.hit.head",
+      "live2dId": "ArtMesh15"
+    },
+    "body": {
+      "semanticEvent": "pet.hit.body",
+      "live2dId": "ArtMesh20"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "motion.motions.tick3.3.file.0.json",
+  "kind": "composite",
+  "scope": "self",
+  "label": "荡秋千",
+  "source": "motion",
+  "sourceKey": "motion-file:Motions_Tick3_3_File_0.json",
+  "channelIds": [
+    "body:motion"
+  ],
+  "play": {
+    "motionGroup": "Tick3",
+    "motionIndex": 3,
+    "motionName": "荡秋千（待机）"
+  },
+  "tags": [
+    "motion",
+    "gated",
+    "idle",
+    "lifecycle",
+    "needs-before",
+    "needs-after"
+  ],
+  "steps": [
+    {
+      "id": "motion.motions.tick3.3.file.0.json:before",
+      "phase": "before",
+      "actionId": "expression.motion.绳子开关.5.开.回正.开"
+    },
+    {
+      "id": "motion.motions.tick3.3.file.0.json:main",
+      "phase": "main",
+      "actionId": "motion.motions.tick3.3.file.0.json"
+    },
+    {
+      "id": "motion.motions.tick3.3.file.0.json:after",
+      "phase": "after",
+      "actionId": "expression.motion.绳子开关.5.关.关"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "expression.motion.秋千.1.拽秋千1.拽秋千1",
+  "kind": "atomic",
+  "scope": "self",
+  "label": "拽秋千1",
+  "source": "expression",
+  "sourceKey": "expression:拽秋千1",
+  "channelIds": [
+    "parameter:Param32"
+  ],
+  "play": {
+    "motionGroup": "秋千#1",
+    "motionIndex": 1,
+    "motionName": "拽秋千1",
+    "expression": "拽秋千1"
+  },
+  "tags": [
+    "expression",
+    "returns"
+  ]
+}

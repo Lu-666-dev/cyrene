@@ -25,6 +25,22 @@ docs/                  architecture decisions and contracts
 
 This repository currently contains the foundation: event bus, capability registry, plugin runtime contracts, Pet Actor runtime, Live2D adapter contract, and two example official plugins.
 
+Run the architecture smoke test:
+
+```bash
+npm run smoke
+```
+
+The smoke test starts the kernel, parses the example Live2D content pack and store listing, loads official plugins, creates a Pet Actor, emits `inventory.item.used`, and verifies the path:
+
+```text
+content parser -> Live2D adapter -> feeding plugin -> pet.stats.modify -> pet.actor.patch -> pet.animation.play
+```
+
 ## References
 
 Open-source lessons we are borrowing at the architecture level are tracked in [docs/open-source-lessons.md](docs/open-source-lessons.md).
+
+Content-pack and model-store rules are tracked in [docs/content-pack-contract.md](docs/content-pack-contract.md).
+
+The model action composer/control-panel direction is tracked in [docs/model-control-panel.md](docs/model-control-panel.md).

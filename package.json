@@ -12,9 +12,13 @@
   ],
   "scripts": {
     "check": "tsc -b",
+    "smoke": "npm run check && node apps/runtime-smoke/dist/index.js",
+    "verify:action-flow": "node scripts/verify-action-flow.mjs",
+    "model-lab": "npm run dev -w @cyrene/model-lab",
     "dev": "echo \"Desktop shell will be added after the core runtime stabilizes.\""
   },
   "devDependencies": {
+    "@types/node": "^20.14.0",
     "typescript": "^5.5.0"
   },
   "packageManager": "npm@10.0.0"

@@ -1,0 +1,20 @@
+{
+  "id": "store.official.default-live2d",
+  "packId": "official.default-live2d",
+  "title": "Default Live2D Pet",
+  "summary": "A starter Live2D model package for Cyrene.",
+  "version": "0.1.0",
+  "category": "pet-model",
+  "download": {
+    "url": "https://example.invalid/packs/default-live2d-0.1.0.zip",
+    "sha256": "replace-with-package-sha256",
+    "sizeBytes": 0
+  },
+  "preview": {
+    "thumbnail": "preview/thumbnail.png",
+    "images": [
+      "preview/idle.png",
+      "preview/eat.png"
+    ]
+  }
+}

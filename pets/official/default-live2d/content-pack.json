@@ -1,0 +1,22 @@
+{
+  "id": "official.default-live2d",
+  "type": "pet-model",
+  "name": "Default Live2D Pet",
+  "version": "0.1.0",
+  "authors": ["Cyrene Team"],
+  "renderer": "live2d",
+  "entry": "model.model3.json",
+  "files": [
+    "model.model3.json",
+    "cyrene-actions.json",
+    "preview/thumbnail.png"
+  ],
+  "license": {
+    "name": "Internal Example",
+    "url": "https://example.invalid/license"
+  },
+  "compatibility": {
+    "cyrene": ">=0.1.0",
+    "renderers": ["live2d"]
+  }
+}

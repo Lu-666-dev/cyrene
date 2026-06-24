@@ -21,7 +21,7 @@ export class Live2DAdapter {
     private readonly events: EventBus,
     capabilities: CapabilityRegistry
   ) {
-    capabilities.register("kernel", "pet.animation.play", async (request) => {
+    capabilities.scoped("kernel").register("pet.animation.play", async (request) => {
       return this.play(request as unknown as PetActionRequest);
     });
   }
