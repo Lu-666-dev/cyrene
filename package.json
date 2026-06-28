@@ -15,7 +15,7 @@
     "smoke": "npm run check && node apps/runtime-smoke/dist/index.js",
     "verify:action-flow": "node scripts/verify-action-flow.mjs",
     "model-lab": "npm run dev -w @cyrene/model-lab",
-    "dev": "echo \"Desktop shell will be added after the core runtime stabilizes.\""
+    "dev": "npm run dev -w @cyrene/desktop"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

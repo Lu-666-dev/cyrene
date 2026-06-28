@@ -6,8 +6,12 @@
   "authors": ["Cyrene Team"],
   "renderer": "live2d",
   "entry": "cyrene.model3.json",
+  "icon": "icon.png",
+  "trayIcon": "tray-icon.png",
   "files": [
     "cyrene.model3.json",
+    "icon.png",
+    "tray-icon.png",
     "Moc_0.moc3",
     "Textures_0_0.png",
     "Physics_0.json",
@@ -29,7 +33,8 @@
     "Expressions_10_File_0.json",
     "Expressions_11_File_0.json",
     "Expressions_circle_question.json",
-    "cyrene-actions.json"
+    "cyrene-actions.json",
+    "cyrene-interactions.json"
   ],
   "license": {
     "name": "Local User Asset"

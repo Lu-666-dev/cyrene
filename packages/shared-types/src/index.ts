@@ -37,6 +37,8 @@ export interface ContentPackManifest {
   readonly authors: readonly string[];
   readonly renderer?: RendererKind;
   readonly entry: string;
+  readonly icon?: string;
+  readonly trayIcon?: string;
   readonly files: readonly string[];
   readonly license: {
     readonly name: string;

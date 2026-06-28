@@ -3,9 +3,11 @@ import {
   createLive2DModelPackage,
   parseContentPackManifest,
   parseLive2DActionMap,
+  parseLive2DInteractionPreset,
   parseLive2DModelSettingsCatalog,
   parseStoreListingManifest,
   validateLive2DActionMapAgainstModel,
+  validateLive2DInteractionPresetAgainstActions,
   validateContentPackFiles
 } from "@cyrene/content";
 import { Live2DAdapter } from "@cyrene/renderer-live2d";
@@ -77,6 +79,9 @@ const contentPack = parseContentPackManifest(
 const actionMap = parseLive2DActionMap(
   await readJson(resolve(modelPackRoot, "cyrene-actions.json"))
 );
+const interactionPreset = parseLive2DInteractionPreset(
+  await readJson(resolve(modelPackRoot, "cyrene-interactions.json"))
+);
 const modelCatalog = parseLive2DModelSettingsCatalog(
   await readJson(resolve(modelPackRoot, contentPack.entry))
 );
@@ -86,6 +91,7 @@ const storeListing = parseStoreListingManifest(
 
 validateContentPackFiles(contentPack, await listPackFiles(modelPackRoot));
 validateLive2DActionMapAgainstModel(actionMap, modelCatalog);
+validateLive2DInteractionPresetAgainstActions(interactionPreset, actionMap);
 if (storeListing.packId !== contentPack.id) {
   throw new Error(`Store listing packId "${storeListing.packId}" does not match content pack "${contentPack.id}"`);
 }
@@ -122,6 +128,7 @@ console.log(JSON.stringify(
       expressions: modelCatalog.expressions.length,
       hitAreas: modelCatalog.hitAreas.length
     },
+    interactionRegions: Object.keys(interactionPreset.interactionRegions).length,
     finalState,
     timeline
   },

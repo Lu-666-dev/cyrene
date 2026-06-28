@@ -9,6 +9,10 @@ export function validateLive2DActionMapAgainstModel(
   const motionGroups = new Set(catalog.motions.map((motion) => motion.group));
   const expressions = new Set(catalog.expressions.map((expression) => expression.name));
   const hitAreaIds = new Set(catalog.hitAreas.map((hitArea) => hitArea.id));
+  const motionsByGroup = new Map<string, typeof catalog.motions>();
+  for (const motion of catalog.motions) {
+    motionsByGroup.set(motion.group, [...(motionsByGroup.get(motion.group) ?? []), motion]);
+  }
 
   for (const [action, mapping] of Object.entries(actionMap.actions)) {
     if (mapping.motionGroup && !motionGroups.has(mapping.motionGroup)) {
@@ -16,6 +20,47 @@ export function validateLive2DActionMapAgainstModel(
         `action "${action}" references unknown motion group "${mapping.motionGroup}"`,
         `cyrene-actions.json.actions.${action}.motionGroup`
       );
+    }
+
+    if (mapping.motionIndex !== undefined) {
+      if (!mapping.motionGroup) {
+        throw new ContractValidationError(
+          `action "${action}" uses motionIndex without motionGroup`,
+          `cyrene-actions.json.actions.${action}.motionIndex`
+        );
+      }
+
+      const motion = motionsByGroup.get(mapping.motionGroup)?.find((entry) => entry.index === mapping.motionIndex);
+      if (!motion) {
+        throw new ContractValidationError(
+          `action "${action}" references unknown motion index "${mapping.motionIndex}" in group "${mapping.motionGroup}"`,
+          `cyrene-actions.json.actions.${action}.motionIndex`
+        );
+      }
+
+      if (mapping.motionName && motion.name !== mapping.motionName) {
+        throw new ContractValidationError(
+          `action "${action}" motionName "${mapping.motionName}" does not match motion index "${mapping.motionIndex}"`,
+          `cyrene-actions.json.actions.${action}.motionName`
+        );
+      }
+    }
+
+    if (mapping.motionName !== undefined && mapping.motionIndex === undefined) {
+      if (!mapping.motionGroup) {
+        throw new ContractValidationError(
+          `action "${action}" uses motionName without motionGroup`,
+          `cyrene-actions.json.actions.${action}.motionName`
+        );
+      }
+
+      const motion = motionsByGroup.get(mapping.motionGroup)?.find((entry) => entry.name === mapping.motionName);
+      if (!motion) {
+        throw new ContractValidationError(
+          `action "${action}" references unknown motion name "${mapping.motionName}" in group "${mapping.motionGroup}"`,
+          `cyrene-actions.json.actions.${action}.motionName`
+        );
+      }
     }
 
     if (mapping.expression && !expressions.has(mapping.expression)) {
