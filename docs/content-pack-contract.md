@@ -23,8 +23,12 @@ Every downloadable content pack must include `content-pack.json` at its root.
   "authors": ["Cyrene Team"],
   "renderer": "live2d",
   "entry": "model.model3.json",
+  "icon": "icon.png",
+  "trayIcon": "tray-icon.png",
   "files": [
     "model.model3.json",
+    "icon.png",
+    "tray-icon.png",
     "motions/idle.motion3.json",
     "expressions/happy.exp3.json",
     "cyrene-actions.json"
@@ -39,6 +43,8 @@ Every downloadable content pack must include `content-pack.json` at its root.
   }
 }
 ```
+
+`icon` is the model's original display image. `trayIcon` is an optional tray-optimized variant; both files must be listed in `files`. The desktop tray prefers `trayIcon` and falls back to `icon`, so changing the active model pack also changes its tray image.
 
 ## Live2D Action Mapping
 
@@ -56,8 +62,11 @@ Feature plugins request semantic actions such as `eat.accept`; the model pack ma
     },
     "eat.accept": {
       "motionGroup": "Eat",
+      "motionIndex": 0,
+      "motionName": "Accept",
       "expression": "happy",
       "priority": 2,
+      "after": "idle.normal",
       "parameters": {
         "ParamMouthOpenY": 0.45
       }
@@ -75,6 +84,50 @@ Feature plugins request semantic actions such as `eat.accept`; the model pack ma
   }
 }
 ```
+
+`after` is optional. When present, it names another semantic action that should be played after the current feedback finishes. Use it for recovery actions such as returning to `idle.normal` or resetting a temporary expression.
+
+## Live2D Interaction Preset
+
+Live2D model packs can include `cyrene-interactions.json` for editable click regions and their default feedback bindings. This file is separate from `cyrene-actions.json` so a future control page can rewrite region bindings without changing the original semantic action library.
+
+```json
+{
+  "version": 1,
+  "name": "Default click interaction preset",
+  "interactionRegions": {
+    "head": {
+      "label": "Head",
+      "semanticEvent": "pet.hit.head",
+      "priority": 40,
+      "shape": {
+        "type": "polygon",
+        "points": [
+          { "x": 0.34, "y": 0.1 },
+          { "x": 0.66, "y": 0.1 },
+          { "x": 0.66, "y": 0.58 },
+          { "x": 0.34, "y": 0.58 }
+        ]
+      },
+      "feedback": {
+        "action": "happy.react",
+        "suggestedActions": ["happy.react", "curious.question"]
+      }
+    }
+  }
+}
+```
+
+`interactionRegions` is the editable click-feedback layer. The renderer first checks the model's real visible alpha outline, then checks which region shape contains the pointer. Region coordinates are normalized against the fitted model bounds. Shapes can be `rect` or `polygon`; use polygons for character parts that need a clean non-overlapping split. The MVP region set is:
+
+```text
+head
+body
+swing.left
+swing.right
+```
+
+Each bound region must point to an existing semantic action through `feedback.action`. `feedback.action` may be `null` while the user has not chosen a behavior yet. The model control page should edit region labels, shapes, priority, and feedback action mappings in this file.
 
 ## Store Listing Manifest
 

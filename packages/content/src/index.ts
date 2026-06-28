@@ -1,11 +1,19 @@
 export { parseContentPackManifest, validateContentPackFiles } from "./content-pack.js";
-export { parseLive2DActionMap } from "./live2d-actions.js";
+export {
+  parseLive2DActionMap,
+  parseLive2DInteractionPreset,
+  validateLive2DInteractionPresetAgainstActions
+} from "./live2d-actions.js";
 export { validateLive2DActionMapAgainstModel } from "./live2d-action-validation.js";
 export { parseLive2DModelSettingsCatalog } from "./live2d-model-settings.js";
 export type {
   Live2DActionContract,
   Live2DActionMapContract,
-  Live2DHitAreaContract
+  Live2DHitAreaContract,
+  Live2DInteractionPresetContract,
+  Live2DInteractionRegionContract,
+  Live2DInteractionRegionFeedbackContract,
+  Live2DInteractionRegionShapeContract
 } from "./live2d-actions.js";
 export type {
   Live2DExpressionEntry,

@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "name": "Default click interaction preset",
+  "description": "Initial editable region and feedback bindings. Set feedback.action from the model control page.",
+  "interactionRegions": {
+    "head": {
+      "label": "\u5934\u90e8",
+      "semanticEvent": "pet.hit.head",
+      "priority": 40,
+      "shape": {
+        "type": "polygon",
+        "points": [
+          { "x": 0.3, "y": 0 },
+          { "x": 0.7, "y": 0 },
+          { "x": 0.72, "y": 0.2 },
+          { "x": 0.7, "y": 0.58 },
+          { "x": 0.3, "y": 0.58 },
+          { "x": 0.28, "y": 0.2 }
+        ]
+      },
+      "feedback": {
+        "action": "happy.react",
+        "suggestedActions": ["happy.react", "curious.question"]
+      }
+    },
+    "body": {
+      "label": "\u8eab\u4f53",
+      "semanticEvent": "pet.hit.body",
+      "priority": 30,
+      "shape": {
+        "type": "polygon",
+        "points": [
+          { "x": 0.3, "y": 0.58 },
+          { "x": 0.7, "y": 0.58 },
+          { "x": 0.72, "y": 0.75 },
+          { "x": 0.7, "y": 1 },
+          { "x": 0.3, "y": 1 },
+          { "x": 0.28, "y": 0.75 }
+        ]
+      },
+      "feedback": {
+        "action": "curious.question",
+        "suggestedActions": ["curious.question", "happy.react"]
+      }
+    },
+    "swing.left": {
+      "label": "\u79cb\u5343\u5de6\u8fb9\u90e8\u4f4d",
+      "semanticEvent": "pet.hit.swing.left",
+      "priority": 20,
+      "shape": {
+        "type": "polygon",
+        "points": [
+          { "x": 0, "y": 0 },
+          { "x": 0.3, "y": 0 },
+          { "x": 0.28, "y": 0.2 },
+          { "x": 0.3, "y": 0.58 },
+          { "x": 0.28, "y": 0.75 },
+          { "x": 0.3, "y": 1 },
+          { "x": 0, "y": 1 }
+        ]
+      },
+      "feedback": {
+        "action": "touch.swing.left",
+        "suggestedActions": ["touch.swing.left", "curious.question"]
+      }
+    },
+    "swing.right": {
+      "label": "\u79cb\u5343\u53f3\u8fb9\u90e8\u4f4d",
+      "semanticEvent": "pet.hit.swing.right",
+      "priority": 20,
+      "shape": {
+        "type": "polygon",
+        "points": [
+          { "x": 0.7, "y": 0 },
+          { "x": 1, "y": 0 },
+          { "x": 1, "y": 1 },
+          { "x": 0.7, "y": 1 },
+          { "x": 0.72, "y": 0.75 },
+          { "x": 0.7, "y": 0.58 },
+          { "x": 0.72, "y": 0.2 }
+        ]
+      },
+      "feedback": {
+        "action": "touch.swing.right",
+        "suggestedActions": ["touch.swing.right", "curious.question"]
+      }
+    }
+  }
+}

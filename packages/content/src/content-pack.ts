@@ -56,6 +56,12 @@ export function parseContentPackManifest(value: unknown): ContentPackManifest {
     version: requireString(object.version, "content-pack.json.version"),
     authors: requireStringArray(object.authors, "content-pack.json.authors"),
     entry: requireString(object.entry, "content-pack.json.entry"),
+    ...(object.icon === undefined
+      ? {}
+      : { icon: requireString(object.icon, "content-pack.json.icon") }),
+    ...(object.trayIcon === undefined
+      ? {}
+      : { trayIcon: requireString(object.trayIcon, "content-pack.json.trayIcon") }),
     files: requireStringArray(object.files, "content-pack.json.files"),
     license: {
       name: requireString(license.name, "content-pack.json.license.name")
@@ -97,6 +103,20 @@ export function validateContentPackFiles(
   if (!files.has(manifest.entry)) {
     throw new ContractValidationError(
       `entry "${manifest.entry}" must be listed in files`,
+      "content-pack.json.files"
+    );
+  }
+
+  if (manifest.icon && !files.has(manifest.icon)) {
+    throw new ContractValidationError(
+      `icon "${manifest.icon}" must be listed in files`,
+      "content-pack.json.files"
+    );
+  }
+
+  if (manifest.trayIcon && !files.has(manifest.trayIcon)) {
+    throw new ContractValidationError(
+      `trayIcon "${manifest.trayIcon}" must be listed in files`,
       "content-pack.json.files"
     );
   }

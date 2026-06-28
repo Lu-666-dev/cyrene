@@ -3,9 +3,12 @@ import type { PetActionRequest } from "@cyrene/shared-types";
 
 export interface Live2DActionMapping {
   readonly motionGroup?: string;
+  readonly motionName?: string;
+  readonly motionIndex?: number;
   readonly expression?: string;
   readonly priority?: number;
   readonly parameters?: Record<string, number>;
+  readonly after?: string;
 }
 
 export interface Live2DModelPackage {
