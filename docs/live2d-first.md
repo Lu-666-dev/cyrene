@@ -1,38 +1,12 @@
-# Live2D-First Runtime
+# Live2D First
 
-Cyrene treats Live2D as the first renderer adapter, while keeping the Pet Actor runtime renderer-agnostic.
+Cyrene currently targets Live2D directly.
 
-## Live2D Adapter Responsibilities
+The content contract keeps model-specific files outside desktop-window code, but the project does not maintain unused renderer abstractions. A second renderer should introduce a shared interface only after its concrete requirements are known.
 
-- Read model settings.
-- Validate required files.
-- Load motions and expressions.
-- Map semantic actions to model-specific assets.
-- Resolve hit areas.
-- Drive parameters and expression intensity.
-- Emit animation lifecycle events.
+The current separation is:
 
-## Semantic Action Mapping
-
-Plugins should request semantic actions:
-
-```text
-idle.normal
-happy.react
-eat.accept
-drag.start
-drag.end
-sleep.enter
-```
-
-The model package owns the mapping:
-
-```json
-{
-  "happy.react": {
-    "motionGroup": "TapBody",
-    "expression": "happy",
-    "priority": 2
-  }
-}
-```
+- `apps/desktop`: native window behavior.
+- `apps/model-lab`: PixiJS and Live2D rendering.
+- `packages/content`: manifests, action mappings, interaction regions, and validation.
+- `pets`: canonical model assets.

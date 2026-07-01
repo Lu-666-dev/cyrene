@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "displayName": "Default Live2D Pet",
+  "systemPrompt": "You are a friendly desktop companion. Reply in the language used by the user.",
+  "firstMessage": "Hello.",
+  "alternateGreetings": [],
+  "exampleMessages": [],
+  "generation": { "temperature": 0.7, "topP": 1, "maxTokens": null },
+  "memory": { "mode": "recent", "contextTurns": 12 }
+}

@@ -1,46 +1,57 @@
 # Cyrene
 
-Cyrene is a lightweight desktop pet platform. The first product target is a Live2D-first desktop pet, but the system core is centered on a renderer-agnostic **Pet Actor** runtime.
+Cyrene is a Live2D desktop pet built with Tauri 2, WebView2, PixiJS, and TypeScript.
 
-## Design Commitments
+The current milestone is to complete the migration from Electron to Tauri, fill the remaining desktop-pet functionality, and keep the development build stable. The Rust host owns native window behavior, the pet page owns Live2D playback and interaction, and shared TypeScript packages validate model content.
 
-- Small kernel, replaceable feature modules.
-- Code-level plugin boundaries, not only feature toggles.
-- Event-driven collaboration between modules.
-- Capability calls for controlled cross-plugin requests.
-- Plugin-owned data and migrations.
-- Live2D as the first renderer adapter, not a hard dependency in business logic.
+Feeding, pet-stat systems, executable plugins, and a plugin SDK are intentionally outside the project scope. They should not be reintroduced while the Tauri desktop application is being completed.
 
 ## Workspace Layout
 
 ```text
-apps/                  desktop shell and future control panels
-core/                  kernel, runtime, renderer adapters, storage
-packages/              shared types, SDK, schemas, UI kit
-plugins/official/      first-party plugins built on the same SDK as third-party plugins
-docs/                  architecture decisions and contracts
+apps/desktop/          Tauri 2 desktop host and Rust native code
+apps/model-lab/        Live2D model lab and desktop pet page
+packages/content/      model-pack parsing, validation, and action compilation
+packages/shared-types/ shared content and action types
+pets/                  canonical model assets
+store/                 store-listing metadata
+scripts/               content verification and generated-asset sync
+docs/                  current architecture and model contracts
 ```
 
-## Current Stage
+`pets/` is the only source of truth for model assets. Development and builds copy it into the Model Lab public directory through `npm run sync:pets`; the generated copy is ignored by Git.
 
-This repository currently contains the foundation: event bus, capability registry, plugin runtime contracts, Pet Actor runtime, Live2D adapter contract, and two example official plugins.
+## Prerequisites
 
-Run the architecture smoke test:
+- Node.js 20.19+ on the Node 20 release line, or Node.js 22.12+.
+- Rust stable with the `x86_64-pc-windows-msvc` toolchain.
+- Visual C++ build tools and a Windows SDK.
+- Microsoft Edge WebView2 Runtime.
+
+## Development
+
+Start the Tauri desktop pet:
 
 ```bash
+npm run dev
+```
+
+Start only the model lab:
+
+```bash
+npm run model-lab
+```
+
+## Verification
+
+```bash
+npm run check:all
 npm run smoke
+npm run verify:action-flow
+npm run build -w @cyrene/model-lab
+npm run build -w @cyrene/desktop
 ```
 
-The smoke test starts the kernel, parses the example Live2D content pack and store listing, loads official plugins, creates a Pet Actor, emits `inventory.item.used`, and verifies the path:
+The smoke check validates the content-pack manifest, model catalog, semantic actions, interaction regions, and store-listing relationship against the real Cyrene model assets. The desktop build uses `--no-bundle` only to verify that the Tauri application compiles; installer and publishing work are outside the current milestone.
 
-```text
-content parser -> Live2D adapter -> feeding plugin -> pet.stats.modify -> pet.actor.patch -> pet.animation.play
-```
-
-## References
-
-Open-source lessons we are borrowing at the architecture level are tracked in [docs/open-source-lessons.md](docs/open-source-lessons.md).
-
-Content-pack and model-store rules are tracked in [docs/content-pack-contract.md](docs/content-pack-contract.md).
-
-The model action composer/control-panel direction is tracked in [docs/model-control-panel.md](docs/model-control-panel.md).
+See [docs/architecture.md](docs/architecture.md) for module boundaries and [docs/content-pack-contract.md](docs/content-pack-contract.md) for the model package format.

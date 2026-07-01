@@ -1,42 +1,60 @@
-# Content Pack Contract
+# Character Content Pack Contract
 
-Cyrene separates executable plugins from downloadable content.
+Cyrene characters are non-executable content packs. A character pack groups its Live2D resources, chat defaults, and model-specific runtime adaptation while application-wide behavior stays outside the pack.
 
-| Kind | Manifest | Can Execute Code | Examples |
-| --- | --- | --- | --- |
-| Code plugin | `plugin.json` | Yes, sandboxed by permissions | feeding, inventory, shop, AI chat |
-| Content pack | `content-pack.json` | No | Live2D model, voice pack, dialogue pack, theme |
-| Store listing | `store-listing.json` | No | Public marketplace metadata and download URL |
+## Directory layout
 
-This separation keeps model downloads safe. A new Live2D character should not need to ship executable code.
+```text
+pets/
+├─ live2d-defaults.json
+└─ official/
+   └─ cyrene-live2d/
+      ├─ content-pack.json
+      ├─ chat.json
+      ├─ runtime.json
+      ├─ assets/
+      │  ├─ icon.png
+      │  └─ tray-icon.png
+      └─ live2d/
+         ├─ cyrene.model3.json
+         ├─ *.moc3
+         ├─ textures, motions, expressions, physics
+         └─ generated/actions/
+```
 
-## Content Pack Manifest
+The four files at the character root have distinct ownership:
 
-Every downloadable content pack must include `content-pack.json` at its root.
+- `content-pack.json` is the stable identity and file index.
+- `chat.json` contains the character's immutable chat defaults.
+- `runtime.json` contains only model-specific Live2D adaptation.
+- `live2d-defaults.json` is global and must not be copied into each character.
+
+API credentials, chat history, long-term memory, and user overrides are application data, not package content.
+
+## Manifest
 
 ```json
 {
-  "id": "official.default-live2d",
+  "id": "official.cyrene-live2d",
   "type": "pet-model",
-  "name": "Default Live2D Pet",
+  "name": "Cyrene Live2D",
   "version": "0.1.0",
   "authors": ["Cyrene Team"],
   "renderer": "live2d",
-  "entry": "model.model3.json",
-  "icon": "icon.png",
-  "trayIcon": "tray-icon.png",
-  "files": [
-    "model.model3.json",
-    "icon.png",
-    "tray-icon.png",
-    "motions/idle.motion3.json",
-    "expressions/happy.exp3.json",
-    "cyrene-actions.json"
-  ],
-  "license": {
-    "name": "Internal Example",
-    "url": "https://example.invalid/license"
+  "entry": "live2d/cyrene.model3.json",
+  "icon": "assets/icon.png",
+  "trayIcon": "assets/tray-icon.png",
+  "character": {
+    "chat": "chat.json",
+    "runtime": "runtime.json"
   },
+  "files": [
+    "chat.json",
+    "runtime.json",
+    "assets/icon.png",
+    "live2d/cyrene.model3.json"
+  ],
+  "license": { "name": "Local User Asset" },
   "compatibility": {
     "cyrene": ">=0.1.0",
     "renderers": ["live2d"]
@@ -44,179 +62,115 @@ Every downloadable content pack must include `content-pack.json` at its root.
 }
 ```
 
-`icon` is the model's original display image. `trayIcon` is an optional tray-optimized variant; both files must be listed in `files`. The desktop tray prefers `trayIcon` and falls back to `icon`, so changing the active model pack also changes its tray image.
+Every path named by `entry`, `icon`, `trayIcon`, and `character` must also appear in `files`. Nested paths use `/` separators.
 
-## Live2D Action Mapping
+## Chat profile
 
-Every Live2D pet model pack must include `cyrene-actions.json`.
-
-Feature plugins request semantic actions such as `eat.accept`; the model pack maps those actions to Live2D-specific motions, expressions, and parameters.
-
-```json
-{
-  "actions": {
-    "idle.normal": {
-      "motionGroup": "Idle",
-      "expression": "neutral",
-      "priority": 0
-    },
-    "eat.accept": {
-      "motionGroup": "Eat",
-      "motionIndex": 0,
-      "motionName": "Accept",
-      "expression": "happy",
-      "priority": 2,
-      "after": "idle.normal",
-      "parameters": {
-        "ParamMouthOpenY": 0.45
-      }
-    }
-  },
-  "hitAreas": {
-    "head": {
-      "semanticEvent": "pet.hit.head",
-      "live2dId": "HitAreaHead"
-    },
-    "body": {
-      "semanticEvent": "pet.hit.body",
-      "live2dId": "HitAreaBody"
-    }
-  }
-}
-```
-
-`after` is optional. When present, it names another semantic action that should be played after the current feedback finishes. Use it for recovery actions such as returning to `idle.normal` or resetting a temporary expression.
-
-## Live2D Interaction Preset
-
-Live2D model packs can include `cyrene-interactions.json` for editable click regions and their default feedback bindings. This file is separate from `cyrene-actions.json` so a future control page can rewrite region bindings without changing the original semantic action library.
+`chat.json` follows this versioned shape:
 
 ```json
 {
   "version": 1,
-  "name": "Default click interaction preset",
-  "interactionRegions": {
-    "head": {
-      "label": "Head",
-      "semanticEvent": "pet.hit.head",
-      "priority": 40,
-      "shape": {
-        "type": "polygon",
-        "points": [
-          { "x": 0.34, "y": 0.1 },
-          { "x": 0.66, "y": 0.1 },
-          { "x": 0.66, "y": 0.58 },
-          { "x": 0.34, "y": 0.58 }
-        ]
-      },
-      "feedback": {
-        "action": "happy.react",
-        "suggestedActions": ["happy.react", "curious.question"]
-      }
-    }
+  "displayName": "Cyrene",
+  "systemPrompt": "You are Cyrene...",
+  "firstMessage": "Hello.",
+  "alternateGreetings": [],
+  "exampleMessages": [],
+  "generation": {
+    "temperature": 0.7,
+    "topP": 1,
+    "maxTokens": null
+  },
+  "memory": {
+    "mode": "recent",
+    "contextTurns": 12
   }
 }
 ```
 
-`interactionRegions` is the editable click-feedback layer. The renderer first checks the model's real visible alpha outline, then checks which region shape contains the pointer. Region coordinates are normalized against the fitted model bounds. Shapes can be `rect` or `polygon`; use polygons for character parts that need a clean non-overlapping split. The MVP region set is:
+These are package defaults. User edits are stored as an override keyed by the manifest `id`, so updating a character package never overwrites user choices.
 
-```text
-head
-body
-swing.left
-swing.right
-```
+## Model runtime
 
-Each bound region must point to an existing semantic action through `feedback.action`. `feedback.action` may be `null` while the user has not chosen a behavior yet. The model control page should edit region labels, shapes, priority, and feedback action mappings in this file.
-
-## Store Listing Manifest
-
-The store uses a separate `store-listing.json`. It should not be trusted as the source of runtime truth; the installed content pack still validates its own `content-pack.json`.
+`runtime.json` contains only values that depend on this Live2D model:
 
 ```json
 {
-  "id": "store.official.default-live2d",
-  "packId": "official.default-live2d",
-  "title": "Default Live2D Pet",
-  "summary": "A starter Live2D model package for Cyrene.",
-  "version": "0.1.0",
-  "category": "pet-model",
-  "download": {
-    "url": "https://example.invalid/packs/default-live2d-0.1.0.zip",
-    "sha256": "replace-with-package-sha256",
-    "sizeBytes": 0
+  "version": 1,
+  "layout": {
+    "fitScale": 0.92,
+    "offsetX": 0,
+    "offsetY": 0
   },
-  "preview": {
-    "thumbnail": "preview/thumbnail.png",
-    "images": ["preview/idle.png", "preview/eat.png"]
-  }
-}
-```
-
-## Add A New Live2D Model To The Download Store
-
-1. Create a new folder under the content source, for example `pets/official/my-pet-live2d`.
-2. Place the Live2D files in that folder: `model.model3.json`, `.moc3`, textures, motions, expressions, physics, pose files.
-3. Add `content-pack.json` and list all required files.
-4. Add `cyrene-actions.json` and map required semantic actions.
-5. Add preview images under `preview/`.
-6. Validate that the pack has no executable code.
-7. Zip the folder as an immutable versioned package, for example `my-pet-live2d-0.1.0.zip`.
-8. Compute the zip SHA-256 and size.
-9. Create or update `store-listing.json`.
-10. Publish the zip and listing to the store index.
-11. The app downloads the zip, verifies SHA-256, validates `content-pack.json`, installs it into the resource cache, then exposes it in the character library.
-
-## Runtime Parsing Pipeline
-
-Content manifests are not documentation-only. They must be parsed by `@cyrene/content` before any renderer or feature module can use them.
-
-```text
-store-listing.json
-  -> parseStoreListingManifest
-  -> verify download sha256 and size
-
-content-pack.json
-  -> parseContentPackManifest
-  -> validateContentPackFiles
-
-cyrene-actions.json
-  -> parseLive2DActionMap
-  -> createLive2DModelPackage
-  -> Live2DAdapter.load
-```
-
-The renderer should never read arbitrary model JSON directly from the store. It receives a validated internal model package:
-
-```ts
-{
-  modelId: "official.default-live2d",
-  modelJsonPath: "model.model3.json",
-  actionMap: {
-    "eat.accept": {
-      motionGroup: "Eat",
-      expression: "happy"
+  "actions": {
+    "idle.normal": { "motionGroup": "Tick3", "priority": 0 },
+    "happy.react": { "motionGroup": "Action", "priority": 1 }
+  },
+  "hitAreas": {
+    "head": {
+      "semanticEvent": "pet.hit.head",
+      "live2dId": "ArtMesh15"
     }
+  },
+  "interactions": {
+    "version": 1,
+    "name": "Default interactions",
+    "interactionRegions": {}
   }
 }
 ```
 
-The same rule applies to future content types. Voice packs, dialogue packs, themes, and mini-game assets need parsers before they are accepted as installable content.
+Use normalized model coordinates for interaction shapes. Semantic actions may map to motions, expressions, parameter values, priorities, and an optional `after` action. Runtime configuration is declarative and may not contain executable code.
 
-Model action composition and the future control panel flow are described in [model-control-panel.md](model-control-panel.md).
+## Global Live2D defaults
 
-## Required Semantic Actions For MVP
+`pets/live2d-defaults.json` owns behavior shared by all characters:
 
-A pet model pack should support these actions before it is accepted into the official store:
+- alpha hit-test threshold;
+- drag threshold and click suppression;
+- user scale range and wheel sensitivity;
+- generic feedback timing;
+- desktop model box and shape padding;
+- diagnostic sampling intervals.
+
+A character runtime must not repeat these fields. Add a character field only when the model needs a genuine compatibility override.
+
+## User data and precedence
+
+Effective configuration is resolved in this order:
 
 ```text
-idle.normal
-happy.react
-eat.accept
-drag.start
-drag.end
-sleep.enter
-sleep.exit
+application defaults
+  < global user preferences
+  < character package defaults
+  < user override for the character ID
 ```
 
-Optional actions can be added freely. Missing optional actions should gracefully fall back to `idle.normal` or `happy.react`.
+Model-specific long-term memory and interaction bindings are also keyed by character ID. API endpoint, LLM selection, and encrypted API key remain global.
+
+## Validation pipeline
+
+```text
+content-pack.json -> parseContentPackManifest -> validateContentPackFiles
+chat.json         -> parseCharacterChatProfile
+runtime.json      -> parseCharacterLive2DRuntime
+model3.json       -> parseLive2DModelSettingsCatalog
+runtime actions   -> validateLive2DActionMapAgainstModel
+interactions      -> validateLive2DInteractionPresetAgainstActions
+```
+
+The renderer only receives the validated internal bundle.
+
+## Store listing
+
+The store keeps a separate `store-listing.json` with download URL, checksum, size, and preview paths. Its `packId` must equal `content-pack.json.id`; it is marketplace metadata, not runtime truth.
+
+## Adding a character
+
+1. Create a package folder below `pets/<publisher>/`.
+2. Put raw Live2D files under `live2d/` without changing their internal relative paths.
+3. Add `chat.json` and `runtime.json`.
+4. Add assets such as icons under `assets/`.
+5. List every required file in `content-pack.json`.
+6. Run `npm run smoke` and `npm run verify:action-flow`.
+7. Package and publish the immutable version, then update its store listing.

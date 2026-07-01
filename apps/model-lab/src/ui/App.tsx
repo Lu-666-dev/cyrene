@@ -2,18 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   compileModelActionQueues,
   createCompiledModelActionState,
-  createModelActionExtraction,
-  parseContentPackManifest,
-  parseLive2DActionMap,
-  parseLive2DModelSettingsCatalog,
-  validateContentPackFiles,
-  validateLive2DActionMapAgainstModel
+  createModelActionExtraction
 } from "@cyrene/content";
 import type { ExpressionParameterHints } from "@cyrene/content";
 import type { CompiledModelActionState, ModelAction, ModelActionQueue } from "@cyrene/shared-types";
 import { Application } from "pixi.js";
 import * as PIXI from "pixi.js";
 import { Live2DModel, MotionPriority } from "pixi-live2d-display/cubism4";
+import { fetchJson, loadLive2DContentBundle } from "../runtime/content-loader";
+import { getActiveCharacterBaseUrl } from "../runtime/active-character";
 import {
   buildActionFlowStages,
   calculateFlowDuration,
@@ -24,7 +21,7 @@ import {
 } from "./action-flow";
 import type { ActionFlowStage } from "./action-flow";
 
-const packBaseUrl = "/pets/official/cyrene-live2d";
+const packBaseUrl = getActiveCharacterBaseUrl();
 const actionNameOverridesStoragePrefix = "cyrene.modelLab.actionNameOverrides";
 
 interface ModelData {
@@ -1128,29 +1125,21 @@ function QueuePreview({
 }
 
 async function loadModelData(): Promise<ModelData> {
-  const [contentPackRaw, actionsRaw] = await Promise.all([
-    fetchJson(`${packBaseUrl}/content-pack.json`),
-    fetchJson(`${packBaseUrl}/cyrene-actions.json`)
-  ]);
-  const contentPack = parseContentPackManifest(contentPackRaw);
-  validateContentPackFiles(contentPack, contentPack.files);
-  const modelSettingsRaw = await fetchJson(`${packBaseUrl}/${contentPack.entry}`);
-  const catalog = parseLive2DModelSettingsCatalog(modelSettingsRaw);
-  const expressionMetadata = await loadExpressionMetadata(catalog.expressions);
+  const content = await loadLive2DContentBundle(packBaseUrl);
+  const contentPack = content.manifest;
+  const catalog = content.modelCatalog;
+  const expressionMetadata = await loadExpressionMetadata(catalog.expressions, content.modelBaseUrl);
   const expressionParameters = expressionMetadata.parameters;
   const extraction = createModelActionExtraction(catalog, expressionParameters);
   const actionNameOverrides = loadActionNameOverrides(contentPack.id);
-  const motionActionChannelOverrides = await loadMotionActionChannelOverrides(extraction.actions);
+  const motionActionChannelOverrides = await loadMotionActionChannelOverrides(extraction.actions, content.modelBaseUrl);
   const modelActions = applyActionNameOverrides(applyActionChannelOverrides(extraction.actions, motionActionChannelOverrides), actionNameOverrides);
   const resetActions = applyActionNameOverrides(applyActionChannelOverrides(extraction.resetActions, motionActionChannelOverrides), actionNameOverrides);
-  const motionResetParameters = await loadMotionResetParameters(resetActions);
-  const actionDurations = await loadActionDurations(extraction.actions, catalog.motions);
-  const actions = parseLive2DActionMap(actionsRaw);
-  validateLive2DActionMapAgainstModel(actions, catalog);
-
+  const motionResetParameters = await loadMotionResetParameters(resetActions, content.modelBaseUrl);
+  const actionDurations = await loadActionDurations(extraction.actions, catalog.motions, content.modelBaseUrl);
   return {
     id: contentPack.id,
-    entryUrl: `${packBaseUrl}/${contentPack.entry}`,
+    entryUrl: content.entryUrl,
     actions: modelActions,
     resetActions,
     resetParameters: createResetParameters(resetActions, modelActions, expressionParameters, motionResetParameters),
@@ -1164,13 +1153,14 @@ async function loadModelData(): Promise<ModelData> {
 
 async function loadActionDurations(
   actions: readonly ModelAction[],
-  motions: readonly { readonly file?: string }[]
+  motions: readonly { readonly file?: string }[],
+  modelBaseUrl: string
 ): Promise<Readonly<Record<string, number>>> {
   const motionDurations = new Map<string, number>();
   const uniqueMotionFiles = [...new Set(motions.map((motion) => motion.file).filter((file): file is string => Boolean(file)))];
 
   await Promise.all(uniqueMotionFiles.map(async (file) => {
-    const rawMotion = await fetchJson(`${packBaseUrl}/${file}`);
+    const rawMotion = await fetchJson(`${modelBaseUrl}/${file}`);
     motionDurations.set(file, parseMotionPreviewDuration(rawMotion));
   }));
 
@@ -1186,11 +1176,11 @@ async function loadActionDurations(
   }));
 }
 
-async function loadMotionActionChannelOverrides(actions: readonly ModelAction[]): Promise<Readonly<Record<string, readonly string[]>>> {
+async function loadMotionActionChannelOverrides(actions: readonly ModelAction[], modelBaseUrl: string): Promise<Readonly<Record<string, readonly string[]>>> {
   const motionActions = actions.filter((action) => action.source === "motion" && action.sourceKey.startsWith("motion-file:"));
   const entries = await Promise.all(motionActions.map(async (action) => {
     const file = action.sourceKey.slice("motion-file:".length);
-    const rawMotion = await fetchJson(`${packBaseUrl}/${file}`);
+    const rawMotion = await fetchJson(`${modelBaseUrl}/${file}`);
     const channels = parseMotionParameterChannelIds(rawMotion);
     return [
       action.id,
@@ -1224,14 +1214,14 @@ function parseMotionParameterChannelIds(value: unknown): readonly string[] {
   return [...channelIds].sort();
 }
 
-async function loadMotionResetParameters(resetActions: readonly ModelAction[]): Promise<readonly ModelParameterValue[]> {
+async function loadMotionResetParameters(resetActions: readonly ModelAction[], modelBaseUrl: string): Promise<readonly ModelParameterValue[]> {
   const motionFiles = [...new Set(resetActions
     .filter((action) => action.source === "motion" && action.sourceKey.startsWith("motion-file:"))
     .map((action) => action.sourceKey.slice("motion-file:".length))
     .filter(Boolean))];
 
   const parameterEntries = await Promise.all(motionFiles.map(async (file) => {
-    const rawMotion = await fetchJson(`${packBaseUrl}/${file}`);
+    const rawMotion = await fetchJson(`${modelBaseUrl}/${file}`);
     return parseMotionResetParameters(rawMotion);
   }));
   const resetValues = new Map<string, number>();
@@ -1302,10 +1292,11 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 async function loadExpressionMetadata(
-  expressions: readonly { readonly name: string; readonly file: string }[]
+  expressions: readonly { readonly name: string; readonly file: string }[],
+  modelBaseUrl: string
 ): Promise<ModelExpressionMetadata> {
   const entries = await Promise.all(expressions.map(async (expression) => {
-    const raw = await fetchJson(`${packBaseUrl}/${expression.file}`);
+    const raw = await fetchJson(`${modelBaseUrl}/${expression.file}`);
     return [
       expression.name,
       parseExpressionMetadata(raw)
@@ -1354,15 +1345,6 @@ function parseExpressionMetadata(value: unknown): {
   }
 
   return { parameters, fadeInMs };
-}
-
-async function fetchJson(url: string): Promise<unknown> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status}`);
-  }
-
-  return response.json() as Promise<unknown>;
 }
 
 function fitModel(app: Application, model: Live2DModel): void {

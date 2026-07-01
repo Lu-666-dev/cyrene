@@ -2,24 +2,33 @@
   "name": "cyrene",
   "version": "0.1.0",
   "private": true,
-  "description": "A lightweight, extensible desktop pet platform centered on Pet Actor runtime and pluggable renderers.",
+  "description": "A Live2D desktop pet built with Tauri, WebView2, PixiJS, and validated model content.",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "workspaces": [
-    "core/*",
     "packages/*",
-    "plugins/official/*",
     "apps/*"
   ],
   "scripts": {
     "check": "tsc -b",
-    "smoke": "npm run check && node apps/runtime-smoke/dist/index.js",
+    "check:desktop": "npm run check -w @cyrene/desktop",
+    "test:desktop": "npm run test -w @cyrene/desktop",
+    "check:all": "npm run check && npm run check:desktop && npm run test:desktop",
+    "smoke": "npm run check && node scripts/verify-content.mjs",
     "verify:action-flow": "node scripts/verify-action-flow.mjs",
+    "sync:pets": "node scripts/sync-pets.mjs",
     "model-lab": "npm run dev -w @cyrene/model-lab",
     "dev": "npm run dev -w @cyrene/desktop"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
+    "esbuild": "^0.28.1",
     "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "gh-pages": "^6.3.0"
   },
   "packageManager": "npm@10.0.0"
 }

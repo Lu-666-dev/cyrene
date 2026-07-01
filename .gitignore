@@ -2,9 +2,12 @@ node_modules/
 
 .tmp/
 apps/desktop/.tmp/
+apps/model-lab/public/pets/
+apps/desktop/src-tauri/gen/
 
 dist/
 **/dist/
+**/target/
 *.tsbuildinfo
 
 .DS_Store

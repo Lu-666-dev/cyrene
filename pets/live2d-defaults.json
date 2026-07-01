@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "input": {
+    "alphaHitThreshold": 24,
+    "dragStartThresholdPx": 6,
+    "longPressClickSuppressMs": 300
+  },
+  "scale": {
+    "min": 0.45,
+    "max": 2.4,
+    "wheelSensitivity": 0.0012,
+    "feedbackVisibleMs": 900
+  },
+  "feedback": {
+    "holdMs": 900
+  },
+  "desktop": {
+    "modelBoxWidth": 420,
+    "modelBoxHeight": 560,
+    "margin": 24,
+    "shapePadding": 10
+  },
+  "diagnostics": {
+    "hitBoundarySampleStep": 4,
+    "hitBoundaryRefreshMs": 1000
+  }
+}

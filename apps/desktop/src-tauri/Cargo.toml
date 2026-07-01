@@ -1,0 +1,19 @@
+[package]
+name = "cyrene-desktop"
+version = "0.1.0"
+description = "Cyrene Live2D desktop pet"
+edition = "2024"
+
+[lib]
+name = "cyrene_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = ["image-png", "tray-icon"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Dwm", "Win32_Security_Cryptography"] }
