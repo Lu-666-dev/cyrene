@@ -1,4 +1,8 @@
 export { parseContentPackManifest, validateContentPackFiles } from "./content-pack.js";
+export { parseCharacterChatProfile } from "./character-chat.js";
+export type { CharacterChatMessage, CharacterChatProfile, CharacterMemoryMode } from "./character-chat.js";
+export { parseCharacterLive2DRuntime, parseLive2DGlobalDefaults } from "./live2d-runtime.js";
+export type { CharacterLive2DRuntime, Live2DGlobalDefaults } from "./live2d-runtime.js";
 export {
   parseLive2DActionMap,
   parseLive2DInteractionPreset,

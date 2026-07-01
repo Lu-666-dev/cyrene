@@ -25,6 +25,9 @@ export function parseContentPackManifest(value: unknown): ContentPackManifest {
     : requireString(object.renderer, "content-pack.json.renderer") as RendererKind;
   const license = requireObject(object.license, "content-pack.json.license");
   const compatibility = requireObject(object.compatibility, "content-pack.json.compatibility");
+  const character = object.character === undefined
+    ? undefined
+    : requireObject(object.character, "content-pack.json.character");
   const renderers = optionalStringArray(
     compatibility.renderers,
     "content-pack.json.compatibility.renderers"
@@ -62,6 +65,14 @@ export function parseContentPackManifest(value: unknown): ContentPackManifest {
     ...(object.trayIcon === undefined
       ? {}
       : { trayIcon: requireString(object.trayIcon, "content-pack.json.trayIcon") }),
+    ...(character === undefined
+      ? {}
+      : {
+          character: {
+            chat: requireString(character.chat, "content-pack.json.character.chat"),
+            runtime: requireString(character.runtime, "content-pack.json.character.runtime")
+          }
+        }),
     files: requireStringArray(object.files, "content-pack.json.files"),
     license: {
       name: requireString(license.name, "content-pack.json.license.name")
@@ -121,11 +132,15 @@ export function validateContentPackFiles(
     );
   }
 
-  if (manifest.type === "pet-model" && manifest.renderer === "live2d" && !files.has("cyrene-actions.json")) {
-    throw new ContractValidationError(
-      "Live2D pet model packs must include cyrene-actions.json",
-      "content-pack.json.files"
-    );
+  if (manifest.character) {
+    for (const [field, file] of Object.entries(manifest.character)) {
+      if (!files.has(file)) {
+        throw new ContractValidationError(
+          `character ${field} file "${file}" must be listed`,
+          "content-pack.json.files"
+        );
+      }
+    }
   }
 
   if (availableFiles) {

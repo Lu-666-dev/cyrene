@@ -3,13 +3,6 @@
   "references": [
     { "path": "./packages/shared-types" },
     { "path": "./packages/content" },
-    { "path": "./packages/sdk" },
-    { "path": "./core/kernel" },
-    { "path": "./core/runtime" },
-    { "path": "./core/renderer-live2d" },
-    { "path": "./plugins/official/pet-stats" },
-    { "path": "./plugins/official/feeding" },
-    { "path": "./apps/runtime-smoke" },
     { "path": "./apps/model-lab" }
   ]
 }

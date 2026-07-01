@@ -1,41 +1,44 @@
 import { Application } from "pixi.js";
 import * as PIXI from "pixi.js";
 import { Live2DModel, MotionPriority } from "pixi-live2d-display/cubism4";
+import type {
+  Live2DActionContract,
+  Live2DInteractionRegionContract,
+  Live2DMotionEntry
+} from "@cyrene/content";
 import { constrainModelOffsetToViewport, constrainUserScaleToViewport } from "./model-viewport.js";
+import { loadLive2DContentBundle } from "./runtime/content-loader.js";
+import { getActiveCharacterBaseUrl } from "./runtime/active-character.js";
+import {
+  createDefaultInteractionActionBindings,
+  loadInteractionActionBindings,
+  normalizeInteractionActionBindings
+} from "./runtime/interaction-bindings.js";
+import type { InteractionActionBindings } from "./runtime/interaction-bindings.js";
+import "./tauri-desktop.js";
 import "./pet-window.css";
 
-const packBaseUrl = "/pets/official/cyrene-live2d";
-const alphaHitThreshold = 24;
-const hitBoundarySampleStep = 4;
+const packBaseUrl = getActiveCharacterBaseUrl();
 const hitBoundaryColor = "#ff4fd8";
-const hitBoundaryRefreshMs = 1000;
 const regionBoundaryColor = "#00d5ff";
 const searchParams = new URLSearchParams(window.location.search);
 const showHitDebug = searchParams.get("debugHit") === "1";
 const recordPetDebug = searchParams.get("debugPet") === "1";
-const feedbackHoldMs = 900;
-const dragStartThresholdPx = 6;
-const longPressClickSuppressMs = 300;
-const minUserScale = 0.45;
-const maxUserScale = 2.4;
-const wheelZoomSensitivity = 0.0012;
-const scaleFeedbackVisibleMs = 900;
-const desktopModelBoxWidth = 420;
-const desktopModelBoxHeight = 560;
-const desktopModelMargin = 24;
-const desktopShapePadding = 10;
 
 declare global {
   interface Window {
     cyreneDesktop?: {
-      setMousePassthrough(value: boolean): void;
+      setMousePassthrough(value: boolean): Promise<void>;
       setWindowShape(rects: readonly WindowShapeRect[]): Promise<void>;
-      setTrayIcon(imageBytes: Uint8Array): void;
-      setDragActive(value: boolean): void;
+      setTrayIcon(imageBytes: Uint8Array): Promise<void>;
+      setDragActive(value: boolean): Promise<void>;
       beginWindowDrag(): void;
       endWindowDrag(): void;
       recordPetDebugSnapshot(payload: unknown): void;
       onCursorSample(callback: (payload: CursorSamplePayload) => void): () => void;
+      onInteractionBindingsUpdated(
+        callback: (bindings: InteractionActionBindings) => void
+      ): () => void;
     };
   }
 }
@@ -60,80 +63,21 @@ interface WindowShapeRect {
   readonly height: number;
 }
 
-interface Live2DActionMapping {
-  readonly motionGroup?: string;
-  readonly motionName?: string;
-  readonly motionIndex?: number;
-  readonly expression?: string;
-  readonly priority?: number;
-  readonly after?: string;
-}
+type Live2DActionMapping = Live2DActionContract;
+type InteractionRegionShape = Live2DInteractionRegionContract["shape"];
+type InteractionRegionRect = Extract<InteractionRegionShape, { readonly type: "rect" }>;
+type InteractionRegionPolygon = Extract<InteractionRegionShape, { readonly type: "polygon" }>;
 
-interface InteractionRegionRect {
-  readonly type: "rect";
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-}
-
-interface InteractionRegionPolygonPoint {
-  readonly x: number;
-  readonly y: number;
-}
-
-interface InteractionRegionPolygon {
-  readonly type: "polygon";
-  readonly points: readonly InteractionRegionPolygonPoint[];
-}
-
-type InteractionRegionShape = InteractionRegionRect | InteractionRegionPolygon;
-
-interface InteractionRegion {
+interface InteractionRegion extends Live2DInteractionRegionContract {
   readonly id: string;
-  readonly label: string;
-  readonly semanticEvent: string;
   readonly priority: number;
-  readonly shape: InteractionRegionShape;
-  readonly feedback: {
-    readonly action?: string | null;
-  };
 }
 
-interface Live2DActionMap {
-  readonly actions: Readonly<Record<string, Live2DActionMapping>>;
-}
-
-interface ContentPackDescriptor {
-  readonly entry: string;
-  readonly icon?: string;
-  readonly trayIcon?: string;
-}
-
-interface Live2DModelMotionEntry {
-  readonly name?: string;
-  readonly file?: string;
-  readonly expression?: string;
-}
-
-interface Live2DModelMotionJsonEntry {
-  readonly Name?: string;
-  readonly File?: string;
-  readonly Expression?: string;
-}
-
-interface Live2DModelSettings {
-  readonly FileReferences?: {
-    readonly Motions?: Record<string, readonly Live2DModelMotionJsonEntry[]>;
-  };
-}
-
-interface InteractionPreset {
-  readonly interactionRegions: readonly InteractionRegion[];
-}
+type Live2DModelMotionEntry = Pick<Live2DMotionEntry, "name" | "file" | "expression">;
 
 interface MotionManagerWithEvents {
   readonly once?: (event: "motionFinish", listener: () => void) => void;
+  readonly off?: (event: "motionFinish", listener: () => void) => void;
 }
 
 interface ModelNaturalBounds {
@@ -150,6 +94,24 @@ if (!root) {
   throw new Error("pet root is missing");
 }
 const petRoot = root;
+const content = await loadLive2DContentBundle(packBaseUrl);
+const contentPack = content.manifest;
+const globalRuntime = content.runtimeDefaults;
+const characterRuntime = content.runtime;
+const alphaHitThreshold = globalRuntime.input.alphaHitThreshold;
+const hitBoundarySampleStep = globalRuntime.diagnostics.hitBoundarySampleStep;
+const hitBoundaryRefreshMs = globalRuntime.diagnostics.hitBoundaryRefreshMs;
+const feedbackHoldMs = globalRuntime.feedback.holdMs;
+const dragStartThresholdPx = globalRuntime.input.dragStartThresholdPx;
+const longPressClickSuppressMs = globalRuntime.input.longPressClickSuppressMs;
+const minUserScale = globalRuntime.scale.min;
+const maxUserScale = globalRuntime.scale.max;
+const wheelZoomSensitivity = globalRuntime.scale.wheelSensitivity;
+const scaleFeedbackVisibleMs = globalRuntime.scale.feedbackVisibleMs;
+const desktopModelBoxWidth = globalRuntime.desktop.modelBoxWidth;
+const desktopModelBoxHeight = globalRuntime.desktop.modelBoxHeight;
+const desktopModelMargin = globalRuntime.desktop.margin;
+const desktopShapePadding = globalRuntime.desktop.shapePadding;
 
 let lastPassthroughState: boolean | null = null;
 let hitAlphaCache: Uint8Array | null = null;
@@ -209,12 +171,33 @@ const scaleFeedback = document.createElement("div");
 scaleFeedback.className = "scale-feedback";
 root.appendChild(scaleFeedback);
 
-const contentPack = await loadContentPackDescriptor();
 void loadDesktopTrayIcon(contentPack.trayIcon ?? contentPack.icon);
-const actionMap = await loadLive2DActionMap();
-const interactionPreset = await loadInteractionPreset();
-const modelMotionCatalog = await loadModelMotionCatalog();
-const model = await Live2DModel.from(`${packBaseUrl}/${contentPack.entry}`, {
+const actionMap = content.actionMap;
+const interactionPreset = {
+  interactionRegions: Object.entries(content.interactionPreset.interactionRegions)
+    .map(([id, region]): InteractionRegion => ({
+      ...region,
+      id,
+      priority: region.priority ?? 0
+    }))
+    .sort((left, right) => right.priority - left.priority)
+};
+const defaultInteractionActionBindings = createDefaultInteractionActionBindings(content.interactionPreset);
+const availableInteractionActions = Object.keys(actionMap.actions);
+let interactionActionBindings = loadInteractionActionBindings(
+  contentPack.id,
+  defaultInteractionActionBindings,
+  availableInteractionActions
+);
+window.cyreneDesktop?.onInteractionBindingsUpdated((bindings) => {
+  interactionActionBindings = normalizeInteractionActionBindings(
+    bindings,
+    defaultInteractionActionBindings,
+    availableInteractionActions
+  );
+});
+const modelMotionCatalog = createModelMotionCatalog(content.modelCatalog.motions);
+const model = await Live2DModel.from(content.entryUrl, {
   autoInteract: false
 });
 app.stage.addChild(model as unknown as PIXI.DisplayObject);
@@ -286,7 +269,7 @@ window.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   setMousePassthrough(false);
   if (usesDesktopWindowShape) {
-    window.cyreneDesktop?.setDragActive(true);
+    runDesktopCommand("start desktop drag", window.cyreneDesktop?.setDragActive(true));
   }
   freezeModelFocus();
   dragSession = {
@@ -372,20 +355,6 @@ window.addEventListener("wheel", (event) => {
   scheduleHitAlphaRefresh();
 }, { passive: false });
 
-async function loadContentPackDescriptor(): Promise<ContentPackDescriptor> {
-  const response = await fetch(`${packBaseUrl}/content-pack.json`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch content-pack.json: ${response.status}`);
-  }
-
-  const raw = await response.json() as ContentPackDescriptor;
-  return {
-    entry: raw.entry,
-    ...(raw.icon ? { icon: raw.icon } : {}),
-    ...(raw.trayIcon ? { trayIcon: raw.trayIcon } : {})
-  };
-}
-
 async function loadDesktopTrayIcon(iconPath: string | undefined): Promise<void> {
   const desktop = window.cyreneDesktop;
   if (!desktop || !iconPath) {
@@ -397,71 +366,26 @@ async function loadDesktopTrayIcon(iconPath: string | undefined): Promise<void> 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    desktop.setTrayIcon(new Uint8Array(await response.arrayBuffer()));
+    await desktop.setTrayIcon(new Uint8Array(await response.arrayBuffer()));
   } catch (error) {
     console.error(`Failed to load model tray icon "${iconPath}".`, error);
   }
 }
 
-async function loadLive2DActionMap(): Promise<Live2DActionMap> {
-  const response = await fetch(`${packBaseUrl}/cyrene-actions.json`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch cyrene-actions.json: ${response.status}`);
-  }
-
-  const raw = await response.json() as {
-    readonly actions?: Record<string, Live2DActionMapping>;
-  };
-
-  const actions = raw.actions ?? {};
-  return { actions };
-}
-
-async function loadInteractionPreset(): Promise<InteractionPreset> {
-  const response = await fetch(`${packBaseUrl}/cyrene-interactions.json`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch cyrene-interactions.json: ${response.status}`);
-  }
-
-  const raw = await response.json() as {
-    readonly interactionRegions?: Record<string, Omit<InteractionRegion, "id">>;
-  };
-
-  const interactionRegions = Object.entries(raw.interactionRegions ?? {})
-    .map(([id, region]) => ({
-      id,
-      label: region.label,
-      semanticEvent: region.semanticEvent,
-      priority: region.priority ?? 0,
-      shape: region.shape,
-      feedback: region.feedback
-    }))
-    .sort((left, right) => right.priority - left.priority);
-
-  return { interactionRegions };
-}
-
-async function loadModelMotionCatalog(): Promise<ReadonlyMap<string, Live2DModelMotionEntry>> {
-  const response = await fetch(`${packBaseUrl}/cyrene.model3.json`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch cyrene.model3.json: ${response.status}`);
-  }
-
-  const raw = await response.json() as Live2DModelSettings;
-  const motions = raw.FileReferences?.Motions ?? {};
+function createModelMotionCatalog(
+  motions: readonly Live2DMotionEntry[]
+): ReadonlyMap<string, Live2DModelMotionEntry> {
   const catalog = new Map<string, Live2DModelMotionEntry>();
-  for (const [group, entries] of Object.entries(motions)) {
-    entries.forEach((rawEntry, index) => {
-      const entry: Live2DModelMotionEntry = removeUndefined({
-        name: rawEntry.Name,
-        file: rawEntry.File,
-        expression: rawEntry.Expression
-      }) as Live2DModelMotionEntry;
-      catalog.set(getMotionCatalogKey(group, index), entry);
-      if (entry.name) {
-        catalog.set(getMotionCatalogKey(group, entry.name), entry);
-      }
-    });
+  for (const motion of motions) {
+    const entry: Live2DModelMotionEntry = removeUndefined({
+      name: motion.name,
+      file: motion.file,
+      expression: motion.expression
+    }) as Live2DModelMotionEntry;
+    catalog.set(getMotionCatalogKey(motion.group, motion.index), entry);
+    if (motion.name) {
+      catalog.set(getMotionCatalogKey(motion.group, motion.name), entry);
+    }
   }
 
   return catalog;
@@ -484,7 +408,7 @@ function fitModel(): void {
   baseModelScale = Math.min(
     layoutWidth / modelNaturalBounds.width,
     layoutHeight / modelNaturalBounds.height
-  ) * 0.92;
+  ) * characterRuntime.layout.fitScale;
   applyModelTransform();
 }
 
@@ -496,8 +420,8 @@ function applyModelTransform(): void {
 
   const scale = baseModelScale * userScale;
   model.scale.set(scale);
-  model.x = modelOffsetX + (layoutWidth - modelNaturalBounds.width * scale) / 2 - modelNaturalBounds.x * scale;
-  model.y = modelOffsetY + layoutHeight - (modelNaturalBounds.y + modelNaturalBounds.height) * scale;
+  model.x = modelOffsetX + characterRuntime.layout.offsetX + (layoutWidth - modelNaturalBounds.width * scale) / 2 - modelNaturalBounds.x * scale;
+  model.y = modelOffsetY + characterRuntime.layout.offsetY + layoutHeight - (modelNaturalBounds.y + modelNaturalBounds.height) * scale;
   updateScaleFeedbackPosition();
   scheduleWindowShapeUpdate();
   if (showHitDebug) {
@@ -685,7 +609,7 @@ function finishDragSession(event: PointerEvent): void {
 
   dragSession = null;
   if (usesDesktopWindowShape) {
-    window.cyreneDesktop?.setDragActive(false);
+    runDesktopCommand("finish desktop drag", window.cyreneDesktop?.setDragActive(false));
   }
   if (session.hasDragged && !usesDesktopWindowShape) {
     window.cyreneDesktop?.endWindowDrag();
@@ -724,7 +648,7 @@ function cancelDragSession(pointerId?: number): void {
 
   dragSession = null;
   if (usesDesktopWindowShape) {
-    window.cyreneDesktop?.setDragActive(false);
+    runDesktopCommand("cancel desktop drag", window.cyreneDesktop?.setDragActive(false));
   }
   if (session.hasDragged && !usesDesktopWindowShape) {
     window.cyreneDesktop?.endWindowDrag();
@@ -785,7 +709,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 async function playFeedbackAction(region: InteractionRegion): Promise<void> {
-  const feedbackAction = region.feedback.action;
+  const feedbackAction = interactionActionBindings[region.id] ?? region.feedback.action;
   if (!feedbackAction) {
     console.info("Cyrene hit region is not bound", {
       id: region.id,
@@ -912,19 +836,36 @@ function waitForMotionFinish(serial: number): Promise<void> {
   }
 
   return new Promise((resolve) => {
-    const timeout = window.setTimeout(resolve, 3000);
-    once.call(motionManager, "motionFinish", () => {
-      window.clearTimeout(timeout);
+    let settled = false;
+    let timeout: number | null = null;
+    let cancellationPoll: number | null = null;
+    const onMotionFinish = () => finish();
+
+    const finish = () => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+      if (cancellationPoll !== null) {
+        window.clearTimeout(cancellationPoll);
+      }
+      motionManager.off?.call(motionManager, "motionFinish", onMotionFinish);
       resolve();
-    });
+    };
+
+    timeout = window.setTimeout(finish, 3000);
+    once.call(motionManager, "motionFinish", onMotionFinish);
 
     const checkCanceled = () => {
       if (feedbackSerial !== serial) {
-        window.clearTimeout(timeout);
-        resolve();
+        finish();
         return;
       }
-      window.setTimeout(checkCanceled, 50);
+      cancellationPoll = window.setTimeout(checkCanceled, 50);
     };
     checkCanceled();
   });
@@ -946,7 +887,16 @@ function setMousePassthrough(value: boolean): void {
   }
 
   lastPassthroughState = value;
-  window.cyreneDesktop?.setMousePassthrough(value);
+  runDesktopCommand(
+    `set mouse passthrough to ${String(value)}`,
+    window.cyreneDesktop?.setMousePassthrough(value)
+  );
+}
+
+function runDesktopCommand(operation: string, command: Promise<void> | undefined): void {
+  void command?.catch((error) => {
+    console.error(`Failed to ${operation}.`, error);
+  });
 }
 
 function syncMousePassthroughAtClientPoint(clientX: number, clientY: number): void {
@@ -1000,7 +950,7 @@ function updateWindowShape(): void {
   void desktop.setWindowShape([rect])
     .catch((error) => {
       lastWindowShapeSignature = "";
-      desktop.setMousePassthrough(true);
+      runDesktopCommand("enable mouse passthrough after a window-shape failure", desktop.setMousePassthrough(true));
       console.error("Failed to update desktop pet input shape.", error);
     })
     .finally(() => {

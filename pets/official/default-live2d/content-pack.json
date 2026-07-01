@@ -5,11 +5,15 @@
   "version": "0.1.0",
   "authors": ["Cyrene Team"],
   "renderer": "live2d",
-  "entry": "model.model3.json",
+  "entry": "live2d/model.model3.json",
+  "character": {
+    "chat": "chat.json",
+    "runtime": "runtime.json"
+  },
   "files": [
-    "model.model3.json",
-    "cyrene-actions.json",
-    "preview/thumbnail.png"
+    "live2d/model.model3.json",
+    "chat.json",
+    "runtime.json"
   ],
   "license": {
     "name": "Internal Example",

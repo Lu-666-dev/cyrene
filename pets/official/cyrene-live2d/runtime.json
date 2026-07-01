@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "layout": {
+    "fitScale": 0.92,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "actions": {
+    "idle.normal": { "motionGroup": "Tick3", "priority": 0 },
+    "happy.react": { "motionGroup": "动作#6", "motionIndex": 1, "motionName": "Wink~", "priority": 1, "after": "motion.reset" },
+    "eat.accept": { "motionGroup": "动作#6", "priority": 2, "parameters": { "ParamMouthOpenY": 0.45 }, "after": "idle.normal" },
+    "drag.start": { "motionGroup": "动作#6", "priority": 3, "after": "idle.normal" },
+    "drag.end": { "motionGroup": "Tick3", "priority": 1 },
+    "sleep.enter": { "motionGroup": "Tick3", "priority": 2 },
+    "sleep.exit": { "motionGroup": "Tick3", "priority": 2 },
+    "curious.question": { "motionGroup": "动作#6", "motionIndex": 2, "motionName": "我可爱吧~", "priority": 1, "after": "motion.reset" },
+    "touch.swing.left": { "motionGroup": "秋千#1", "motionIndex": 1, "motionName": "拽秋千1", "priority": 1, "after": "swing.reset" },
+    "touch.swing.right": { "motionGroup": "秋千#1", "motionIndex": 2, "motionName": "拽秋千2", "priority": 1, "after": "swing.reset" },
+    "motion.reset": { "motionGroup": "动作#6", "motionIndex": 0, "motionName": "动作回正", "priority": 1 },
+    "swing.reset": { "motionGroup": "秋千#1", "motionIndex": 0, "motionName": "拽秋千0", "priority": 1 },
+    "expression.reset": { "expression": "表情回正", "priority": 1 }
+  },
+  "hitAreas": {
+    "head": { "semanticEvent": "pet.hit.head", "live2dId": "ArtMesh15" },
+    "body": { "semanticEvent": "pet.hit.body", "live2dId": "ArtMesh20" }
+  },
+  "interactions": {
+    "version": 1,
+    "name": "Default click interaction preset",
+    "description": "Initial editable region and feedback bindings.",
+    "interactionRegions": {
+      "head": {
+        "label": "头部",
+        "semanticEvent": "pet.hit.head",
+        "priority": 40,
+        "shape": { "type": "polygon", "points": [{ "x": 0.3, "y": 0 }, { "x": 0.7, "y": 0 }, { "x": 0.72, "y": 0.2 }, { "x": 0.7, "y": 0.58 }, { "x": 0.3, "y": 0.58 }, { "x": 0.28, "y": 0.2 }] },
+        "feedback": { "action": "happy.react", "suggestedActions": ["happy.react", "curious.question"] }
+      },
+      "body": {
+        "label": "身体",
+        "semanticEvent": "pet.hit.body",
+        "priority": 30,
+        "shape": { "type": "polygon", "points": [{ "x": 0.3, "y": 0.58 }, { "x": 0.7, "y": 0.58 }, { "x": 0.72, "y": 0.75 }, { "x": 0.7, "y": 1 }, { "x": 0.3, "y": 1 }, { "x": 0.28, "y": 0.75 }] },
+        "feedback": { "action": "curious.question", "suggestedActions": ["curious.question", "happy.react"] }
+      },
+      "swing.left": {
+        "label": "秋千左边部位",
+        "semanticEvent": "pet.hit.swing.left",
+        "priority": 20,
+        "shape": { "type": "polygon", "points": [{ "x": 0, "y": 0 }, { "x": 0.3, "y": 0 }, { "x": 0.28, "y": 0.2 }, { "x": 0.3, "y": 0.58 }, { "x": 0.28, "y": 0.75 }, { "x": 0.3, "y": 1 }, { "x": 0, "y": 1 }] },
+        "feedback": { "action": "touch.swing.left", "suggestedActions": ["touch.swing.left", "curious.question"] }
+      },
+      "swing.right": {
+        "label": "秋千右边部位",
+        "semanticEvent": "pet.hit.swing.right",
+        "priority": 20,
+        "shape": { "type": "polygon", "points": [{ "x": 0.7, "y": 0 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 0.7, "y": 1 }, { "x": 0.72, "y": 0.75 }, { "x": 0.7, "y": 0.58 }, { "x": 0.72, "y": 0.2 }] },
+        "feedback": { "action": "touch.swing.right", "suggestedActions": ["touch.swing.right", "curious.question"] }
+      }
+    }
+  }
+}

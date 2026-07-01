@@ -428,7 +428,7 @@ function* enumerateSequences(items, maxLength) {
 }
 
 async function loadGeneratedActions() {
-  const actionsDir = path.join(workspaceRoot, "pets", "official", "cyrene-live2d", "generated", "actions");
+  const actionsDir = path.join(workspaceRoot, "pets", "official", "cyrene-live2d", "live2d", "generated", "actions");
   const names = await readdir(actionsDir);
   const actions = [];
 
@@ -448,7 +448,8 @@ async function loadGeneratedActions() {
 
 async function loadRealActionParameters(actions) {
   const packDir = path.join(workspaceRoot, "pets", "official", "cyrene-live2d");
-  const modelSettings = JSON.parse(await readFile(path.join(packDir, "cyrene.model3.json"), "utf8"));
+  const modelDir = path.join(packDir, "live2d");
+  const modelSettings = JSON.parse(await readFile(path.join(modelDir, "cyrene.model3.json"), "utf8"));
   const expressionFiles = new Map((modelSettings.FileReferences?.Expressions ?? []).map((expression) => [
     expression.Name,
     expression.File
@@ -456,7 +457,7 @@ async function loadRealActionParameters(actions) {
   const expressionParameters = new Map();
 
   for (const [expressionName, expressionFile] of expressionFiles) {
-    const expression = JSON.parse(await readFile(path.join(packDir, expressionFile), "utf8"));
+    const expression = JSON.parse(await readFile(path.join(modelDir, expressionFile), "utf8"));
     expressionParameters.set(expressionName, (expression.Parameters ?? []).map((parameter) => ({
       id: String(parameter.Id),
       value: Number(parameter.Value)

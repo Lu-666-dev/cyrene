@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/main.mjs",
   "scripts": {
-    "dev": "node scripts/start-dev.mjs"
+    "dev": "tauri dev",
+    "build": "tauri build --no-bundle",
+    "check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml"
   },
   "devDependencies": {
-    "electron": "^41.7.1"
+    "@tauri-apps/cli": "^2.11.4"
   }
 }

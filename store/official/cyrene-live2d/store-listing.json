@@ -11,9 +11,9 @@
     "sizeBytes": 0
   },
   "preview": {
-    "thumbnail": "Textures_0_0.png",
+    "thumbnail": "live2d/Textures_0_0.png",
     "images": [
-      "Textures_0_0.png"
+      "live2d/Textures_0_0.png"
     ]
   }
 }

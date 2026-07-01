@@ -14,7 +14,7 @@ textures
 physics
 ```
 
-It also validates that `cyrene-actions.json` only references motion groups, expressions, and hit areas that exist in the actual model.
+It also validates that the action map in `runtime.json` only references motion groups, expressions, and hit areas that exist in the actual model.
 
 ## User Flow
 
@@ -23,7 +23,7 @@ Install model pack
   -> parse content-pack.json
   -> parse model3.json
   -> extract motions / expressions / hit areas
-  -> parse cyrene-actions.json if present
+  -> parse runtime.json action map
   -> validate existing mappings
   -> open action composer UI
 ```
@@ -125,7 +125,7 @@ This keeps downloaded packages immutable while allowing user customization.
 Original package:
 
 ```text
-pets/official/cyrene-live2d/cyrene-actions.json
+pets/official/cyrene-live2d/runtime.json
 ```
 
 User override:
@@ -138,7 +138,7 @@ The runtime should merge them in order:
 
 ```text
 built-in required defaults
-  -> content-pack cyrene-actions.json
+  -> character runtime.json action map
   -> user override
 ```
 

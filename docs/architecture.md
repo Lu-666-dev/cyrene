@@ -1,66 +1,34 @@
 # Architecture
 
-Cyrene is organized around one central concept: **Pet Actor**.
-
-A Pet Actor is the stable runtime identity of a character. It owns state, receives events, asks for capabilities, and delegates visual output to a renderer adapter.
+Cyrene currently has three runtime boundaries:
 
 ```text
-Input
-  user gesture, time tick, item usage, chat, system events
+Tauri desktop host (Rust)
+  transparent window, tray, cursor sampling, mouse pass-through, native commands
 
-Event Bus
-  typed events shared across kernel and plugins
+Model page (TypeScript)
+  PixiJS, Live2D rendering, model transform, hit testing, interaction playback
 
-Pet Actor Runtime
-  state, behavior decisions, action requests
-
-Renderer Adapter
-  Live2D first, later Sprite, Spine, VRM
-
-Output
-  motion, expression, parameters, speech, audio, new events
+Content packages (TypeScript)
+  manifest parsing, model/action validation, action compilation, shared types
 ```
 
-## Kernel Boundary
+## Desktop Boundary
 
-The kernel provides only stable primitives:
+`apps/desktop/src-tauri` owns operating-system behavior. It creates the transparent Tauri window and exposes a narrow command surface for model hit rectangles, mouse pass-through state, drag state, and tray icons.
 
-- Event bus
-- Capability registry
-- Plugin lifecycle
-- Permission declarations
-- Storage contracts
-- Resource contracts
+Tauri does not expose Electron-style dynamic window shapes. On Windows, the host keeps a full-monitor transparent window, samples the global cursor, tests it against the current model rectangle, and toggles whole-window input pass-through. New native commands should be added only when a model-page feature requires operating-system access.
 
-Feature code lives in plugins. Plugins do not import each other. They communicate through events, capabilities, and extension points.
+## Model Boundary
 
-## Data Boundary
+`apps/model-lab/src/pet-main.ts` is the desktop model page. It loads the selected content-pack entry, renders the model, maps interaction regions to actions, and synchronizes the visible model bounds with the Tauri host.
 
-Plugins own their data. Cross-plugin writes must go through capabilities.
+`apps/model-lab/src/tauri-desktop.ts` adapts Tauri commands and events to the small desktop bridge consumed by the model page. The Model Lab UI uses the same content contracts to inspect and preview actions.
 
-Allowed:
+## Content Boundary
 
-```ts
-await ctx.capabilities.call("pet.stats.modify", { actorId, hungerDelta: 10 });
-ctx.events.emit("feeding.completed", { actorId, itemId });
-```
+`packages/content` accepts untrusted JSON as `unknown`, parses it into typed contracts, and validates references against the Live2D model catalog. `pets/` is the canonical asset directory; the public copy used by Vite is generated and must not be edited directly.
 
-Avoid:
+Each character content pack owns three payloads: raw resources under `live2d/`, immutable chat defaults in `chat.json`, and model-specific adaptation in `runtime.json`. Shared renderer behavior lives once in `pets/live2d-defaults.json`. User chat overrides, interaction bindings, and encrypted memory are keyed by the stable content-pack ID and never written back into the installed character package.
 
-```ts
-import { addAffinity } from "../affinity";
-```
-
-## Renderer Boundary
-
-Business logic asks for semantic actions:
-
-```ts
-await ctx.capabilities.call("pet.animation.play", {
-  actorId,
-  action: "happy.react",
-  intensity: 0.8
-});
-```
-
-The Live2D adapter maps semantic actions to model-specific motions, expressions, hit areas, and parameters.
+Dynamic executable plugins, a plugin SDK, feeding, and pet-stat systems are outside the current project scope. The active architecture work is limited to completing the Electron-to-Tauri migration and keeping the desktop pet, Model Lab, and content validation paths maintainable.

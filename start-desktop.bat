@@ -17,6 +17,18 @@ if not exist "node_modules\" (
   exit /b 1
 )
 
+if exist "%USERPROFILE%\.cargo\bin\cargo.exe" (
+  set "PATH=%USERPROFILE%\.cargo\bin;%PATH%"
+)
+
+where cargo.exe >nul 2>nul
+if errorlevel 1 (
+  echo [Cyrene] Rust/Cargo is not installed or is not available in PATH.
+  echo [Cyrene] Install Rust from https://rustup.rs/ and reopen this terminal.
+  pause
+  exit /b 1
+)
+
 echo [Cyrene] Starting desktop pet...
 call npm.cmd run dev
 

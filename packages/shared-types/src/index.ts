@@ -5,27 +5,6 @@ export interface JsonObject {
   readonly [key: string]: JsonValue;
 }
 
-export type PluginId = string;
-export type ActorId = string;
-export type CapabilityName = string;
-export type EventName = string;
-
-export interface EventEnvelope<TPayload = unknown> {
-  readonly name: EventName;
-  readonly source: PluginId | "kernel";
-  readonly timestamp: number;
-  readonly payload: TPayload;
-}
-
-export interface PluginManifest {
-  readonly id: PluginId;
-  readonly name: string;
-  readonly version: string;
-  readonly entry: string;
-  readonly permissions: readonly string[];
-  readonly migrations?: readonly string[];
-}
-
 export type ContentPackType = "pet-model" | "voice-pack" | "dialogue-pack" | "theme" | "mini-game-assets";
 export type RendererKind = "live2d" | "sprite" | "spine" | "vrm";
 
@@ -39,6 +18,10 @@ export interface ContentPackManifest {
   readonly entry: string;
   readonly icon?: string;
   readonly trayIcon?: string;
+  readonly character?: {
+    readonly chat: string;
+    readonly runtime: string;
+  };
   readonly files: readonly string[];
   readonly license: {
     readonly name: string;
@@ -66,23 +49,6 @@ export interface StoreListingManifest {
     readonly thumbnail: string;
     readonly images: readonly string[];
   };
-}
-
-export interface PetActorState {
-  readonly actorId: ActorId;
-  readonly modelId: string;
-  readonly mood: number;
-  readonly hunger: number;
-  readonly energy: number;
-  readonly affinity: number;
-  readonly behavior: string;
-}
-
-export interface PetActionRequest {
-  readonly actorId: ActorId;
-  readonly action: string;
-  readonly intensity?: number;
-  readonly reason?: string;
 }
 
 export interface PetBehaviorFeedback {

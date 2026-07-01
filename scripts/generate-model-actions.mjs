@@ -13,11 +13,12 @@ if (!packDir) {
 
 const contentPack = JSON.parse(await readFile(path.join(packDir, "content-pack.json"), "utf8"));
 const modelSettings = JSON.parse(await readFile(path.join(packDir, contentPack.entry), "utf8"));
+const modelDir = path.dirname(path.join(packDir, contentPack.entry));
 const catalog = parseLive2DModelSettingsCatalog(modelSettings);
 const expressionParameters = {};
 
 for (const expression of catalog.expressions) {
-  const expressionJson = JSON.parse(await readFile(path.join(packDir, expression.file), "utf8"));
+  const expressionJson = JSON.parse(await readFile(path.join(modelDir, expression.file), "utf8"));
   expressionParameters[expression.name] = (expressionJson.Parameters ?? []).map((parameter) => ({
     id: parameter.Id,
     value: parameter.Value,
@@ -26,7 +27,7 @@ for (const expression of catalog.expressions) {
 }
 
 const extraction = createModelActionExtraction(catalog, expressionParameters);
-const outputDir = path.join(packDir, "generated", "actions");
+const outputDir = path.join(modelDir, "generated", "actions");
 await mkdir(outputDir, { recursive: true });
 
 const index = {
